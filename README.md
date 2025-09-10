@@ -57,4 +57,4 @@ This backend provides REST APIs to add, list, and delete habits.
 ---
 
 ## 📝 License
-This project is licensed under the [MIT License](LICENSE) © 2025 [Your Name].
+This project is licensed under the [MIT License](LICENSE) © 2025 Revati Mahajan.
