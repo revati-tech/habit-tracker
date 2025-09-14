@@ -18,23 +18,23 @@ public class HabitController {
     private HabitRepository habitRepository;
 
     @GetMapping
-    public List<Habit> findAll() {
+    public List<Habit> getAllHabits() {
         return habitRepository.findAll();
     }
 
     @PostMapping
-    public Habit save(@RequestBody Habit habit) {
+    public Habit createHabit(@RequestBody Habit habit) {
         return habitRepository.save(habit);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteHabit(@PathVariable Long id) {
         habitRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Habit> findById(@PathVariable Long id) {
+    public ResponseEntity<Habit> getHabitById(@PathVariable Long id) {
        Habit habit = habitRepository.findById(id)
                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Habit Not Found"));
        return ResponseEntity.ok(habit);

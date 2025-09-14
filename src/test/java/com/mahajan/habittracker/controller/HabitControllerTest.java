@@ -48,7 +48,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    void testSave() throws Exception {
+    void testCreateHabit() throws Exception {
         mockMvc.perform(post("/api/habits").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(habit))
                 .accept(MediaType.APPLICATION_JSON))
@@ -58,7 +58,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    void testFindAll() throws Exception {
+    void testGetAllHabits() throws Exception {
        addHabitAndReturn();
         mockMvc.perform(get("/api/habits"))
                 .andExpect(status().isOk())
@@ -68,7 +68,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    void testFindById() throws Exception {
+    void testGetHabitById() throws Exception {
         Habit savedHabit = addHabitAndReturn();
         mockMvc.perform(get("/api/habits/{id}", savedHabit.getId()))
                 .andExpect(status().isOk())
@@ -77,7 +77,7 @@ public class HabitControllerTest {
     }
 
     @Test
-    void testDeleteById() throws Exception {
+    void testDeleteHabit() throws Exception {
         Habit savedHabit = addHabitAndReturn();
         mockMvc.perform(delete("/api/habits/{id}", savedHabit.getId()))
                 .andExpect(status().isNoContent());
