@@ -35,8 +35,19 @@ public class HabitController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Habit> getHabitById(@PathVariable Long id) {
-       Habit habit = habitRepository.findById(id)
-               .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Habit Not Found"));
-       return ResponseEntity.ok(habit);
+       return ResponseEntity.ok(findHabit(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Habit> updateHabit(@PathVariable Long id, @RequestBody Habit habitRequest) {
+        Habit updatedHabit = findHabit(id);
+        updatedHabit.setName(habitRequest.getName());
+        updatedHabit.setDescription(habitRequest.getDescription());
+        return ResponseEntity.ok(habitRepository.save(updatedHabit));
+    }
+
+    private Habit findHabit(Long id) {
+        return habitRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Habit Not Found"));
     }
 }

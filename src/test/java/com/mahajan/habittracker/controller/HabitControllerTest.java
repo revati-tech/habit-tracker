@@ -85,4 +85,17 @@ public class HabitControllerTest {
                 .andExpect(status().isOk())
                 .andExpect((jsonPath("$", hasSize(0))));
     }
+
+    @Test
+    void testUpdateHabit() throws Exception {
+        Habit habitRequest = addHabitAndReturn();
+        habitRequest.setName("Updated Name");
+        habitRequest.setDescription("Updated Description");
+       mockMvc.perform(put("/api/habits/{id}",  habitRequest.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(habitRequest)))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.name").value("Updated Name"))
+               .andExpect(jsonPath("$.description").value("Updated Description"));
+    }
 }
