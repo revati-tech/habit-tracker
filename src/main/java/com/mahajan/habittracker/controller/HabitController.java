@@ -29,7 +29,8 @@ public class HabitController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHabit(@PathVariable Long id) {
-        habitRepository.deleteById(id);
+        Habit habit = findHabit(id);  // throws 404 if not found
+        habitRepository.delete(habit);
         return ResponseEntity.noContent().build();
     }
 
