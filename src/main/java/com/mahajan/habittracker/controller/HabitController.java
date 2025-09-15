@@ -1,13 +1,10 @@
 package com.mahajan.habittracker.controller;
 
 import com.mahajan.habittracker.model.Habit;
-import com.mahajan.habittracker.repository.HabitRepository;
+import com.mahajan.habittracker.service.HabitService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -16,22 +13,21 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HabitController {
 
-    private final HabitRepository habitRepository;
+    private final HabitService habitService;
 
     @GetMapping
     public List<Habit> getAllHabits() {
-        return habitRepository.findAll();
+        return habitService.getAllHabits();
     }
 
     @PostMapping
     public Habit createHabit(@RequestBody Habit habit) {
-        return habitRepository.save(habit);
+        return habitService.createHabit(habit);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHabit(@PathVariable Long id) {
-        Habit habit = findHabit(id);  // throws 404 if not found
-        habitRepository.delete(habit);
+        habitService.deleteHabit(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -41,15 +37,11 @@ public class HabitController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Habit> updateHabit(@PathVariable Long id, @RequestBody Habit habitRequest) {
-        Habit updatedHabit = findHabit(id);
-        updatedHabit.setName(habitRequest.getName());
-        updatedHabit.setDescription(habitRequest.getDescription());
-        return ResponseEntity.ok(habitRepository.save(updatedHabit));
+    public ResponseEntity<Habit> updateHabit(@PathVariable Long id, @RequestBody Habit inHabit) {
+        return ResponseEntity.ok(habitService.updateHabit(id, inHabit));
     }
 
     private Habit findHabit(Long id) {
-        return habitRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Habit Not Found"));
+       return habitService.getHabitById(id);
     }
 }
