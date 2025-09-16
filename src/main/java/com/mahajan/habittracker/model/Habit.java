@@ -12,6 +12,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 //@Data intentionally not using to avoid lombok and JPA issues
 public class Habit {
     @Id
@@ -20,9 +21,4 @@ public class Habit {
 
     private String name;
     private String description;
-
-    public Habit(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
 }

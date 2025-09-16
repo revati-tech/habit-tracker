@@ -32,9 +32,7 @@ public class HabitControllerTest {
 
     @BeforeEach
     void setUp() {
-        habit = new Habit();
-        habit.setName("Exercise");
-        habit.setDescription("Daily workout");
+        habit = Habit.builder().name("Exercise").description("Daily workout").build();
     }
 
     private Habit addHabitAndReturn() throws Exception {
