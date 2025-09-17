@@ -4,12 +4,14 @@ import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.repository.HabitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class HabitService {
     private final HabitRepository habitRepository;
 
@@ -19,7 +21,10 @@ public class HabitService {
 
     public Habit getHabitById(Long id) {
         return habitRepository.findById(id)
-                .orElseThrow(() -> new HabitNotFoundException(id));
+                .orElseThrow(() -> {
+                    log.warn("Habit with id={} not found", id);
+                    return new HabitNotFoundException(id);
+                });
     }
 
     public Habit createHabit(Habit habit) {

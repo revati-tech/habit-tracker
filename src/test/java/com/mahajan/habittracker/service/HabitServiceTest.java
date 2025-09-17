@@ -3,15 +3,14 @@ package com.mahajan.habittracker.service;
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.repository.HabitRepository;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +18,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @org.junit.jupiter.api.extension.ExtendWith(MockitoExtension.class)
-@Transactional
 class HabitServiceTest {
 
     @Mock
@@ -37,7 +35,7 @@ class HabitServiceTest {
 
     @Test
     void testGetAllHabits() {
-        List<Habit> habits = Arrays.asList(
+        List<Habit> habits = List.of(
                 habit,
                 Habit.builder().name("Meditation").description("Daily 10 min meditation")
                         .build());
@@ -46,28 +44,22 @@ class HabitServiceTest {
         List<Habit> result = habitService.getAllHabits();
 
         Assertions.assertEquals(2, result.size());
-        Assertions.assertEquals(habits.get(0).getName(), result.get(0).getName());
-        Assertions.assertEquals(habits.get(0).getDescription(), result.get(0).getDescription());
-        Assertions.assertEquals(habits.get(1).getName(), result.get(1).getName());
-        Assertions.assertEquals(habits.get(1).getDescription(), result.get(1).getDescription());
+        assertHabitEquals(habits.get(0), result.get(0));
+        assertHabitEquals(habits.get(1), result.get(1));
     }
 
     @Test
     void testGetHabitById() {
         when(habitRepository.findById(1L)).thenReturn(Optional.of(habit));
-
         Habit result = habitService.getHabitById(1L);
-
-        Assertions.assertEquals(habit.getName(), result.getName());
-        Assertions.assertEquals(habit.getDescription(), result.getDescription());
+        assertHabitEquals(habit, result);
     }
 
     @Test
     void testGetHabitByIdNonExistent() {
-        when(habitRepository.findById(99L)).thenReturn(Optional.empty());
-
-        Assertions.assertThrows(HabitNotFoundException.class, () ->
-                habitService.getHabitById(99L));
+        Long id = 99L;
+        when(habitRepository.findById(id)).thenReturn(Optional.empty());
+        assertHabitNotFound(id, () ->   habitService.getHabitById(id));
     }
 
     @Test
@@ -79,9 +71,7 @@ class HabitServiceTest {
         Habit result = habitService.createHabit(habit);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(1L, result.getId());
-        Assertions.assertEquals(savedHabit.getName(), result.getName());
-        Assertions.assertEquals(savedHabit.getDescription(), result.getDescription());
+        assertHabitEquals(savedHabit, result);
 
         verify(habitRepository, times(1)).save(habit);
     }
@@ -95,34 +85,46 @@ class HabitServiceTest {
 
         Habit result = habitService.updateHabit(1L, updates);
 
-        Assertions.assertEquals("New Name", result.getName());
-        Assertions.assertEquals("New description", result.getDescription());
+        assertHabitEquals(updates, habit);
+        verify(habitRepository, times(1)).save(habit);
     }
 
     @Test
     void testUpdateHabitNonExistent() {
+        Long id = 99L;
         Habit updates = Habit.builder().name("New Name").description("New description").build();
-        when(habitRepository.findById(99L)).thenReturn(Optional.empty());
+        when(habitRepository.findById(id)).thenReturn(Optional.empty());
+        assertHabitNotFound(id, () -> habitService.updateHabit(id, updates));
+        verify(habitRepository, times(0)).save(any(Habit.class));
 
-        Assertions.assertThrows(HabitNotFoundException.class, () ->
-                habitService.updateHabit(99L, updates));
     }
 
     @Test
     void testDeleteHabit() {
-        when(habitRepository.findById(1L)).thenReturn(Optional.of(habit));
+        Long id = 1L;
+        when(habitRepository.findById(id)).thenReturn(Optional.of(habit));
         doNothing().when(habitRepository).delete(habit);
-
-        habitService.deleteHabit(1L);
-
+        habitService.deleteHabit(id);
         verify(habitRepository, times(1)).delete(habit);
     }
 
     @Test
     void testDeleteHabitNonExistent() {
-        when(habitRepository.findById(99L)).thenReturn(Optional.empty());
+        Long id = 99L;
+        when(habitRepository.findById(id)).thenReturn(Optional.empty());
+        assertHabitNotFound(id, () -> habitService.deleteHabit(id));
+        verify(habitRepository, times(0)).delete(habit);
+    }
 
-        Assertions.assertThrows(HabitNotFoundException.class, () ->
-                habitService.deleteHabit(99L));
+    private void assertHabitNotFound(Long id, Executable executable) {
+        HabitNotFoundException exception = Assertions.assertThrows(HabitNotFoundException.class, executable);
+        Assertions.assertEquals("Habit with id " + id + " not found", exception.getMessage());
+        verify(habitRepository, times(1)).findById(id);
+    }
+
+    private void assertHabitEquals(Habit expected, Habit actual) {
+        Assertions.assertEquals(expected.getId(), actual.getId());
+        Assertions.assertEquals(expected.getName(), actual.getName());
+        Assertions.assertEquals(expected.getDescription(), actual.getDescription());
     }
 }
