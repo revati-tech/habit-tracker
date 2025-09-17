@@ -1,7 +1,10 @@
 package com.mahajan.habittracker.controller;
 
+import com.mahajan.habittracker.dto.HabitRequest;
+import com.mahajan.habittracker.dto.HabitResponse;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.service.HabitService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +19,17 @@ public class HabitController {
     private final HabitService habitService;
 
     @GetMapping
-    public List<Habit> getAllHabits() {
-        return habitService.getAllHabits();
+    public List<HabitResponse> getAllHabits() {
+        return habitService.getAllHabits()
+                .stream().map(h -> HabitResponse.builder()
+                        .id(h.getId()).name(h.getName()).description(h.getDescription()).build())
+                .toList();
     }
 
     @PostMapping
-    public Habit createHabit(@RequestBody Habit habit) {
+    public Habit createHabit(@Valid @RequestBody HabitRequest habitRequest) {
+        Habit habit = Habit.builder().name(habitRequest
+                .getName()).description(habitRequest.getDescription()).build();
         return habitService.createHabit(habit);
     }
 
@@ -32,16 +40,17 @@ public class HabitController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Habit> getHabitById(@PathVariable Long id) {
-       return ResponseEntity.ok(findHabit(id));
+    public HabitResponse getHabitById(@PathVariable Long id) {
+       Habit habit = habitService.getHabitById(id);
+       return HabitResponse.builder()
+               .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Habit> updateHabit(@PathVariable Long id, @RequestBody Habit inHabit) {
-        return ResponseEntity.ok(habitService.updateHabit(id, inHabit));
-    }
-
-    private Habit findHabit(Long id) {
-       return habitService.getHabitById(id);
+    public HabitResponse updateHabit(@PathVariable Long id, @Valid @RequestBody HabitRequest habitRequest) {
+        Habit habit = Habit.builder().name(habitRequest.getName())
+                .description(habitRequest.getDescription()).build();
+        Habit updated = habitService.updateHabit(id, habit);
+        return HabitResponse.builder().id(updated.getId()).name(updated.getName()).description(habit.getDescription()).build();
     }
 }
