@@ -6,6 +6,7 @@ import com.mahajan.habittracker.repository.HabitRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -17,7 +18,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@org.junit.jupiter.api.extension.ExtendWith(MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class HabitServiceTest {
 
     @Mock

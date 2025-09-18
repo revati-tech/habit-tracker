@@ -2,6 +2,7 @@ package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
+import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.HabitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import java.util.List;
 @Slf4j
 public class HabitService {
     private final HabitRepository habitRepository;
+    private final UserService userService;
 
     public List<Habit> getAllHabits() {
         return habitRepository.findAll();
@@ -42,6 +44,5 @@ public class HabitService {
         Habit existing = getHabitById(id);
         habitRepository.delete(existing);
     }
-
 }
 

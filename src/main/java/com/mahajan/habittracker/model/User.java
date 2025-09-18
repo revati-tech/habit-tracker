@@ -3,6 +3,7 @@ package com.mahajan.habittracker.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 
 @Entity
 @Getter
@@ -10,16 +11,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-//@Data intentionally not using to avoid lombok and JPA issues
-public class Habit {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String description;
+    @Column(unique = true, nullable = false)
+    private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+   @OneToMany(mappedBy = "User", cascade = CascadeType.ALL, orphanRemoval = true)
+   private List<Habit> habits;
 }
