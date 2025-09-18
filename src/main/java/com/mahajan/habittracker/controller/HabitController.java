@@ -27,7 +27,7 @@ public class HabitController {
     }
 
     @PostMapping
-    public Habit createHabit(@Valid @RequestBody HabitRequest habitRequest) {
+    public Habit createHabit(@Valid @RequestBody(required = true) HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest
                 .getName()).description(habitRequest.getDescription()).build();
         return habitService.createHabit(habit);
@@ -47,7 +47,7 @@ public class HabitController {
     }
 
     @PutMapping("/{id}")
-    public HabitResponse updateHabit(@PathVariable Long id, @Valid @RequestBody HabitRequest habitRequest) {
+    public HabitResponse updateHabit(@PathVariable Long id, @Valid @RequestBody(required = true) HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest.getName())
                 .description(habitRequest.getDescription()).build();
         Habit updated = habitService.updateHabit(id, habit);

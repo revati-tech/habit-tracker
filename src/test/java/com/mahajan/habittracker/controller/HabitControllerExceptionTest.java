@@ -67,6 +67,17 @@ public class HabitControllerExceptionTest {
         assertHabitNotFound(result, id);
     }
 
+    @Test
+    void testUpdateHabitMissingBody() throws Exception {
+        Long id = 42L;
+
+        // No need to stub service, request will fail before service is called
+        mockMvc.perform(put("/api/habits/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON)) // no body
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"));
+    }
+
     private void assertHabitNotFound(ResultActions result, Long id) throws Exception {
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
