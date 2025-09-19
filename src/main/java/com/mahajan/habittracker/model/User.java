@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.List;
 
+@Table(name = "users")  // avoid reserved keyword "user"
 @Entity
 @Getter
 @Setter
@@ -19,6 +20,6 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-   @OneToMany(mappedBy = "User", cascade = CascadeType.ALL, orphanRemoval = true)
+   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
    private List<Habit> habits;
 }

@@ -2,6 +2,7 @@ package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
+import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.HabitRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,22 +28,32 @@ class HabitServiceTest {
     @InjectMocks
     private HabitService habitService;
 
+    @Mock
+    private UserService userService;
+
     private Habit habit;
+
+    private User user;
+
+    private final Long userId = 1L;
+
+    private final Long habitId = 10L;
 
     @BeforeEach
     void setUp() {
-        habit = Habit.builder().name("Exercise").description("Daily workout").build();
+        user = User.builder().id(userId).email("test@test.com").build();
+        habit = Habit.builder().id(habitId).name("Exercise").description("Daily workout").build();
     }
 
     @Test
-    void testGetAllHabits() {
+    void testGetHabitsByUser() {
         List<Habit> habits = List.of(
                 habit,
                 Habit.builder().name("Meditation").description("Daily 10 min meditation")
                         .build());
         when(habitRepository.findAll()).thenReturn(habits);
 
-        List<Habit> result = habitService.getAllHabits();
+        List<Habit> result = habitService.getHabitsByUser(userId);
 
         Assertions.assertEquals(2, result.size());
         assertHabitEquals(habits.get(0), result.get(0));
@@ -51,8 +62,8 @@ class HabitServiceTest {
 
     @Test
     void testGetHabitById() {
-        when(habitRepository.findById(1L)).thenReturn(Optional.of(habit));
-        Habit result = habitService.getHabitById(1L);
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(habit));
+        Habit result = habitService.getHabitById(habitId);
         assertHabitEquals(habit, result);
     }
 
@@ -65,11 +76,12 @@ class HabitServiceTest {
 
     @Test
     void testCreateHabit() {
-        Habit savedHabit = Habit.builder().id(1L).name("Exercise").description("Daily workout").build();
+        Habit savedHabit = Habit.builder().id(habitId).name("Exercise").description("Daily workout").build();
 
         when(habitRepository.save(any(Habit.class))).thenReturn(savedHabit);
+        when(userService.getUserById(userId)).thenReturn(user);
 
-        Habit result = habitService.createHabit(habit);
+        Habit result = habitService.createHabit(user.getId(), habit);
 
         Assertions.assertNotNull(result);
         assertHabitEquals(savedHabit, result);
@@ -86,7 +98,7 @@ class HabitServiceTest {
 
         Habit result = habitService.updateHabit(1L, updates);
 
-        assertHabitEquals(updates, habit);
+        assertHabitEquals(habit, result);
         verify(habitRepository, times(1)).save(habit);
     }
 
@@ -102,10 +114,9 @@ class HabitServiceTest {
 
     @Test
     void testDeleteHabit() {
-        Long id = 1L;
-        when(habitRepository.findById(id)).thenReturn(Optional.of(habit));
+        when(habitRepository.findById(habitId)).thenReturn(Optional.of(habit));
         doNothing().when(habitRepository).delete(habit);
-        habitService.deleteHabit(id);
+        habitService.deleteHabit(habitId);
         verify(habitRepository, times(1)).delete(habit);
     }
 

@@ -2,7 +2,6 @@ package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
-import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.HabitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,7 @@ public class HabitService {
     private final HabitRepository habitRepository;
     private final UserService userService;
 
-    public List<Habit> getAllHabits() {
+    public List<Habit> getHabitsByUser(Long userId) {
         return habitRepository.findAll();
     }
 
@@ -29,7 +28,8 @@ public class HabitService {
                 });
     }
 
-    public Habit createHabit(Habit habit) {
+    public Habit createHabit(Long userId, Habit habit) {
+        habit.setUser(userService.getUserById(userId));
         return habitRepository.save(habit);
     }
 

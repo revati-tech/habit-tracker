@@ -12,36 +12,36 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/habits")
+@RequestMapping("/api/users/{userId}/habits")
 @RequiredArgsConstructor
 public class HabitController {
 
     private final HabitService habitService;
 
     @GetMapping
-    public List<HabitResponse> getAllHabits() {
-        return habitService.getAllHabits()
+    public List<HabitResponse> getHabitsByUser(@PathVariable Long userId) {
+        return habitService.getHabitsByUser(userId)
                 .stream().map(h -> HabitResponse.builder()
                         .id(h.getId()).name(h.getName()).description(h.getDescription()).build())
                 .toList();
     }
 
     @PostMapping
-    public Habit createHabit(@Valid @RequestBody(required = true) HabitRequest habitRequest) {
+    public Habit createHabit(@PathVariable Long userId, @Valid @RequestBody(required = true) HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest
                 .getName()).description(habitRequest.getDescription()).build();
-        return habitService.createHabit(habit);
+        return habitService.createHabit(userId, habit);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHabit(@PathVariable Long id) {
-        habitService.deleteHabit(id);
+    @DeleteMapping("/{habitId}")
+    public ResponseEntity<Void> deleteHabit(@PathVariable Long userId, @PathVariable Long habitId) {
+        habitService.deleteHabit(habitId);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}")
-    public HabitResponse getHabitById(@PathVariable Long id) {
-       Habit habit = habitService.getHabitById(id);
+    public HabitResponse getHabitById(@PathVariable Long userId, @PathVariable Long habitId) {
+       Habit habit = habitService.getHabitById(habitId);
        return HabitResponse.builder()
                .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
