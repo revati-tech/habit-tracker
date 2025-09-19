@@ -1,18 +1,21 @@
 package com.mahajan.habittracker.service;
 
+import com.mahajan.habittracker.exceptions.UserNotFoundException;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.UserRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,13 +59,37 @@ public class UserServiceTest {
     @Test
     public void testGetUserByEmail() {
         when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-        User result = userService.getUserByEmail(userEmail).get();
+        User result = userService.getUserByEmail(userEmail);
         assertUser(user, result);
         verify(userRepository, times(1)).findByEmail(userEmail);
+    }
+
+    @Test
+    void testGetUserByIdNonExistent() {
+        Long id = 99L;
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+        assertUserNotFound(id, () ->   userService.getUserById(id));
+    }
+
+    @Test
+    void testGetUserByEmailNonExistent() {
+        String email = "abc";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class,
+                () -> userService.getUserByEmail(email));
+        Assertions.assertEquals("User with email " + email + " not found", exception.getMessage());
+        verify(userRepository, times(1)).findByEmail(email);
     }
 
     private void assertUser(User expected, User actual) {
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getEmail(), actual.getEmail());
+    }
+
+    private void assertUserNotFound(Long id, Executable executable) {
+        UserNotFoundException exception = assertThrows(UserNotFoundException.class, executable);
+        Assertions.assertEquals("User with id " + id + " not found", exception.getMessage());
+        verify(userRepository, times(1)).findById(id);
     }
 }

@@ -24,6 +24,12 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request.getRequestURI());
     }
 
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(HabitNotFoundException e, HttpServletRequest request) {
+        log.error("User not found: {}", e.getMessage(), e); // logs stack
+        return buildErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request.getRequestURI());
+    }
+
     // ------------------ 400 Bad Request ------------------
     @ExceptionHandler({
             HttpMessageNotReadableException.class,  // missing/invalid body

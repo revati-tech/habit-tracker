@@ -1,8 +1,10 @@
 package com.mahajan.habittracker.service;
 
+import com.mahajan.habittracker.exceptions.UserNotFoundException;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,6 +12,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     private final UserRepository userRepository;
 
@@ -22,10 +25,16 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElseThrow();
+        return userRepository.findById(id).orElseThrow(() -> {
+            log.warn("User with id {} not found", id);
+           return new UserNotFoundException(id);
+        });
     }
 
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(() -> {
+            log.warn("User with email {} not found", email);
+            return new UserNotFoundException(email);
+        });
     }
 }
