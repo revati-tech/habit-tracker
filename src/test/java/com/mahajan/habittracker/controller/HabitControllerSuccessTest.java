@@ -22,6 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class HabitControllerSuccessTest {
 
+    private final static String BASE_URL = "/api/users/1/habits";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -36,7 +38,7 @@ public class HabitControllerSuccessTest {
     }
 
     private Habit addHabitAndReturn() throws Exception {
-        String response = mockMvc.perform(post("/api/habits")
+        String response = mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habit)))
                 .andExpect(status().isOk())
@@ -77,9 +79,9 @@ public class HabitControllerSuccessTest {
     @Test
     void testDeleteHabit() throws Exception {
         Habit savedHabit = addHabitAndReturn();
-        mockMvc.perform(delete("/api/habits/{id}", savedHabit.getId()))
+        mockMvc.perform(delete("/api/users/1/habits/{id}", savedHabit.getId()))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get("/api/habits"))
+        mockMvc.perform(get("/api/users/1/habits"))
                 .andExpect(status().isOk())
                 .andExpect((jsonPath("$", hasSize(0))));
     }
