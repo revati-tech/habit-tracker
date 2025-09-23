@@ -39,18 +39,18 @@ public class HabitController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{habitId}")
     public HabitResponse getHabitById(@PathVariable Long userId, @PathVariable Long habitId) {
        Habit habit = habitService.getHabitById(habitId);
        return HabitResponse.builder()
                .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
 
-    @PutMapping("/{id}")
-    public HabitResponse updateHabit(@PathVariable Long id, @Valid @RequestBody(required = true) HabitRequest habitRequest) {
+    @PutMapping("/{habitId}")
+    public HabitResponse updateHabit(@PathVariable Long userId, @PathVariable Long habitId, @Valid @RequestBody(required = true) HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest.getName())
                 .description(habitRequest.getDescription()).build();
-        Habit updated = habitService.updateHabit(id, habit);
+        Habit updated = habitService.updateHabit(habitId, habit);
         return HabitResponse.builder().id(updated.getId()).name(updated.getName()).description(habit.getDescription()).build();
     }
 }

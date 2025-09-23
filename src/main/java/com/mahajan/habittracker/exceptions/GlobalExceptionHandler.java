@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(HabitNotFoundException e, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException e, HttpServletRequest request) {
         log.error("User not found: {}", e.getMessage(), e); // logs stack
         return buildErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request.getRequestURI());
     }

@@ -22,6 +22,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
     private static final String EMAIL = "test@test.com";
 
+    private static final String BASE_URL = "/api/users/{userId}";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -32,7 +34,7 @@ class UserControllerTest {
     void testCreateUser() throws Exception {
         UserRequest request = UserRequest.builder().email(EMAIL).build();
 
-        ResultActions result = mockMvc.perform(post("/api/users/")
+        ResultActions result = mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)));
 
@@ -44,21 +46,21 @@ class UserControllerTest {
     @Test
     void testGetAllUsers() throws Exception {
         User user = addUserAndReturn();
-        ResultActions result = mockMvc.perform(get("/api/users/" + user.getId()));
+        ResultActions result = mockMvc.perform(get(BASE_URL, user.getId()));
         assertUserResponse(result, user);
     }
 
     @Test
     void testGetUserById() throws Exception {
         User user = addUserAndReturn();
-        ResultActions result = mockMvc.perform(get("/api/users/" + user.getId()));
+        ResultActions result = mockMvc.perform(get(BASE_URL, user.getId()));
         assertUserResponse(result, user);
     }
 
     private User addUserAndReturn() throws Exception {
         UserRequest request = UserRequest.builder().email(EMAIL).build();
 
-        ResultActions result = mockMvc.perform(post("/api/users/")
+        ResultActions result = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)));
 
