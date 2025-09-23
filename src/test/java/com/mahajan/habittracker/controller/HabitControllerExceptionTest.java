@@ -25,6 +25,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 public class HabitControllerExceptionTest {
+    private final static String BASE_URL = "/api/users/{userId}/habits/{habitId}";
+
+    private final static Long TEST_USER_ID = 100L;
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -37,7 +41,7 @@ public class HabitControllerExceptionTest {
         when(habitService.getHabitById(id))
                 .thenThrow(new HabitNotFoundException(id));
 
-        ResultActions result = mockMvc.perform(get("/api/habits/{id}", id)
+        ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, id)
                 .contentType(MediaType.APPLICATION_JSON));
         assertHabitNotFound(result, id);
     }
@@ -50,7 +54,7 @@ public class HabitControllerExceptionTest {
 
         String body = "{\"name\":\"New Name\",\"description\":\"New Description\"}";
 
-        ResultActions result = mockMvc.perform(put("/api/habits/{id}", id)
+        ResultActions result = mockMvc.perform(put(BASE_URL, TEST_USER_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body));
         assertHabitNotFound(result, id);
@@ -62,7 +66,7 @@ public class HabitControllerExceptionTest {
         doThrow(new HabitNotFoundException(id))
                 .when(habitService).deleteHabit(id);
 
-        ResultActions result = mockMvc.perform(delete("/api/habits/{id}", id)
+        ResultActions result = mockMvc.perform(delete(BASE_URL, TEST_USER_ID, id)
                 .contentType(MediaType.APPLICATION_JSON));
         assertHabitNotFound(result, id);
     }
@@ -72,7 +76,7 @@ public class HabitControllerExceptionTest {
         Long id = 42L;
 
         // No need to stub service, request will fail before service is called
-        mockMvc.perform(put("/api/habits/{id}", id)
+        mockMvc.perform(put(BASE_URL, TEST_USER_ID, id)
                         .contentType(MediaType.APPLICATION_JSON)) // no body
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Bad Request"));
