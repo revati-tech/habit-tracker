@@ -27,10 +27,12 @@ public class HabitController {
     }
 
     @PostMapping
-    public Habit createHabit(@PathVariable Long userId, @Valid @RequestBody(required = true) HabitRequest habitRequest) {
+    public HabitResponse createHabit(@PathVariable Long userId, @Valid @RequestBody(required = true) HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest
                 .getName()).description(habitRequest.getDescription()).build();
-        return habitService.createHabit(userId, habit);
+        habitService.createHabit(userId, habit);
+        return HabitResponse.builder()
+                .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
 
     @DeleteMapping("/{habitId}")
