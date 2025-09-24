@@ -5,7 +5,7 @@ import com.mahajan.habittracker.dto.UserResponse;
 import com.mahajan.habittracker.model.User;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UserMapperTest {
     private static final Long ID = 1L;

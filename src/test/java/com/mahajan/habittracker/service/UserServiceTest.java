@@ -19,15 +19,12 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
+    private final String USER_EMAIL = "test@test.com";
     @Mock
     private UserRepository userRepository;
-
     @InjectMocks
     private UserService userService;
-
     private User user;
-
-    private final String USER_EMAIL = "test@test.com";
 
     @BeforeEach
     public void setup() {
@@ -67,7 +64,7 @@ public class UserServiceTest {
     void testGetUserByIdNonExistent() {
         Long id = 99L;
         when(userRepository.findById(id)).thenReturn(Optional.empty());
-        assertUserNotFound(id, () ->   userService.getUserById(id));
+        assertUserNotFound(id, () -> userService.getUserById(id));
     }
 
     @Test

@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -60,8 +59,8 @@ public class HabitControllerExceptionTest {
         String body = "{\"name\":\"New Name\",\"description\":\"New Description\"}";
 
         ResultActions result = mockMvc.perform(put(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body));
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
         assertHabitNotFound(result, TEST_HABIT_ID);
     }
 
@@ -88,7 +87,6 @@ public class HabitControllerExceptionTest {
                 .contentType(MediaType.APPLICATION_JSON));
         assertHabitNotFound(result, TEST_HABIT_ID);
     }
-
 
 
     @Test

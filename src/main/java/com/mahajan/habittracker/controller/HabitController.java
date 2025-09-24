@@ -44,9 +44,9 @@ public class HabitController {
 
     @GetMapping("/{habitId}")
     public HabitResponse getHabitById(@PathVariable Long userId, @PathVariable Long habitId) {
-       Habit habit = habitService.getHabitForUserById(HabitKey.of(userId, habitId));
-       return HabitResponse.builder()
-               .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
+        Habit habit = habitService.getHabitForUserById(HabitKey.of(userId, habitId));
+        return HabitResponse.builder()
+                .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
 
     @PutMapping("/{habitId}")

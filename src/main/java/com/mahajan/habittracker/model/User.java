@@ -20,6 +20,6 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-   private List<Habit> habits;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Habit> habits;
 }

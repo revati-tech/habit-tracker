@@ -26,25 +26,18 @@ import static org.mockito.Mockito.*;
 @Transactional
 class HabitServiceTest {
 
-    @Mock
-    private HabitRepository habitRepository;
-
-    @InjectMocks
-    private HabitService habitService;
-
-    @Mock
-    private UserService userService;
-
-    private Habit habit;
-
-    private User user;
-
     private static final Long TEST_USER_ID = 1L;
-
     private static final Long TEST_HABIT_ID = 10L;
-
     private static final HabitKey TEST_HABIT_KEY =
             HabitKey.of(TEST_USER_ID, TEST_HABIT_ID);
+    @Mock
+    private HabitRepository habitRepository;
+    @InjectMocks
+    private HabitService habitService;
+    @Mock
+    private UserService userService;
+    private Habit habit;
+    private User user;
 
     @BeforeEach
     void setUp() {
@@ -80,7 +73,7 @@ class HabitServiceTest {
         when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID))
                 .thenReturn(Optional.empty());
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
-        assertHabitNotFound(() ->   habitService.getHabitForUserById(TEST_HABIT_KEY));
+        assertHabitNotFound(() -> habitService.getHabitForUserById(TEST_HABIT_KEY));
     }
 
     @Test

@@ -1,8 +1,8 @@
 package com.mahajan.habittracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mahajan.habittracker.dto.UserRequest;
 import com.mahajan.habittracker.dto.HabitRequest;
+import com.mahajan.habittracker.dto.UserRequest;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.User;
 import jakarta.transaction.Transactional;
@@ -14,10 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @SpringBootTest
@@ -64,18 +64,18 @@ public class HabitControllerSuccessTest {
 
     @Test
     void testCreateHabit() throws Exception {
-        String response =  mockMvc.perform(post(BASE_URL, testUser.getId()).contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(habit))
-                .accept(MediaType.APPLICATION_JSON))
+        String response = mockMvc.perform(post(BASE_URL, testUser.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(habit))
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
-              //  .andExpect(jsonPath("$.name").value("Exercise"))
+        //  .andExpect(jsonPath("$.name").value("Exercise"))
         //  //.andExpect(jsonPath("$.description").value("Daily workout"));
     }
 
     @Test
     void testGetAllHabits() throws Exception {
-       addHabitAndReturn();
+        addHabitAndReturn();
         mockMvc.perform(get(BASE_URL, testUser.getId()))
                 .andExpect(status().isOk())
                 .andExpect((jsonPath("$", hasSize(1))))
@@ -107,10 +107,10 @@ public class HabitControllerSuccessTest {
         Habit existingHabit = addHabitAndReturn();
         HabitRequest habitRequest = HabitRequest.builder().name("Updated Name").description("Updated Description").build();
         mockMvc.perform(put(BASE_URL + "/{habitId}", testUser.getId(), existingHabit.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(habitRequest)))
-               .andExpect(status().isOk())
-               .andExpect(jsonPath("$.name").value("Updated Name"))
-               .andExpect(jsonPath("$.description").value("Updated Description"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(habitRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Updated Name"))
+                .andExpect(jsonPath("$.description").value("Updated Description"));
     }
 }
