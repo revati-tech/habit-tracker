@@ -19,7 +19,8 @@ public class HabitService {
     private final UserService userService;
 
     public List<Habit> getHabitsByUser(Long userId) {
-        return habitRepository.findAll();
+        userService.getUserById(userId);
+        return habitRepository.findAllByUserId(userId);
     }
 
     public Habit getHabitForUserById(HabitKey key) {

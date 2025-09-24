@@ -59,9 +59,7 @@ class HabitControllerSuccessTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-       Habit habit = objectMapper.readValue(response, Habit.class);
-       habit.setUser(testUser);
-       return habit;
+       return objectMapper.readValue(response, Habit.class);
     }
 
     @Test
@@ -77,11 +75,22 @@ class HabitControllerSuccessTest {
     @Test
     void testGetAllHabits() throws Exception {
         addHabitAndReturn();
+
+        Habit habit2 = Habit.builder().name("Meditation").description("Daily meditation").build();
+
+        mockMvc.perform(post(BASE_URL, testUser.getId())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(habit2)))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
         mockMvc.perform(get(BASE_URL, testUser.getId()))
                 .andExpect(status().isOk())
-                .andExpect((jsonPath("$", hasSize(1))))
+                .andExpect((jsonPath("$", hasSize(2))))
                 .andExpect(jsonPath("$[0].name").value("Exercise"))
-                .andExpect(jsonPath("$[0].description").value("Daily workout"));
+                .andExpect(jsonPath("$[0].description").value("Daily workout"))
+                .andExpect(jsonPath("$[1].name").value("Meditation"))
+                .andExpect(jsonPath("$[1].description").value("Daily meditation"));
     }
 
     @Test

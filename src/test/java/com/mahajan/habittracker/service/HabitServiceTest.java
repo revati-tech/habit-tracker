@@ -51,7 +51,7 @@ class HabitServiceTest {
                 habit,
                 Habit.builder().name("Meditation").description("Daily 10 min meditation")
                         .build());
-        when(habitRepository.findAll()).thenReturn(habits);
+        when(habitRepository.findAllByUserId(TEST_USER_ID)).thenReturn(habits);
 
         List<Habit> result = habitService.getHabitsByUser(TEST_USER_ID);
 
@@ -148,6 +148,27 @@ class HabitServiceTest {
         verify(userService, times(1)).getUserById(userId);
         verify(habitRepository, never()).findByIdAndUserId(anyLong(), anyLong());
     }
+
+    @Test
+    void testGetHabitsForUserWithNoHabits() {
+        when(habitRepository.findAllByUserId(TEST_USER_ID)).thenReturn(List.of());
+        List<Habit> result = habitService.getHabitsByUser(TEST_USER_ID);
+        Assertions.assertTrue(result.isEmpty());
+        verify(habitRepository, times(1)).findAllByUserId(TEST_USER_ID);
+    }
+
+    @Test
+    void testGetHabitsForUserNotFound() {
+        when(userService.getUserById(anyLong()))
+                .thenThrow(new UserNotFoundException(TEST_USER_ID));
+
+        assertThrows(UserNotFoundException.class, () ->
+                habitService.getHabitsByUser(TEST_USER_ID));
+
+        verify(userService, times(1)).getUserById(TEST_USER_ID);
+        verify(habitRepository, never()).findAllByUserId(anyLong());
+    }
+
 
     private void assertHabitNotFound(Executable executable) {
         HabitNotFoundException exception = assertThrows(HabitNotFoundException.class, executable);
