@@ -8,5 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface HabitRepository extends JpaRepository<Habit, Long> {
-    Optional<Habit> findByIdAndUserId(Long id, Long userId);
+    default Optional<Habit> findByIdAndUserId(Long id, Long userId) {
+        return Optional.empty();
+    }
 }

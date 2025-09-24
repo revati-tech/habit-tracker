@@ -48,11 +48,11 @@ This backend provides REST APIs to add, list, and delete habits.
 
 ## 📌 API Endpoints
 
-| Method | Endpoint              | Description       | Example Body |
-|--------|-----------------------|-------------------|--------------|
-| GET    | `/api/habits`         | List all habits   | — |
-| POST   | `/api/habits`         | Add a new habit   | `{ "name": "Exercise", "description": "Run daily" }` |
-| DELETE | `/api/habits/{id}`    | Delete by ID      | — |
+| Method | Endpoint           | Description     | Example Body                                         |
+|--------|--------------------|-----------------|------------------------------------------------------|
+| GET    | `/api/habits`      | List all habits | —                                                    |
+| POST   | `/api/habits`      | Add a new habit | `{ "name": "Exercise", "description": "Run daily" }` |
+| DELETE | `/api/habits/{id}` | Delete by ID    | —                                                    |
 
 ---
 

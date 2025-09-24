@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class HabitControllerSuccessTest {
+class HabitControllerSuccessTest {
 
     private static final String BASE_URL = "/api/users/{userId}/habits";
 
@@ -64,13 +64,12 @@ public class HabitControllerSuccessTest {
 
     @Test
     void testCreateHabit() throws Exception {
-        String response = mockMvc.perform(post(BASE_URL, testUser.getId()).contentType(MediaType.APPLICATION_JSON)
+     mockMvc.perform(post(BASE_URL, testUser.getId()).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habit))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-        //  .andExpect(jsonPath("$.name").value("Exercise"))
-        //  //.andExpect(jsonPath("$.description").value("Daily workout"));
+                .andExpect(jsonPath("$.name").value("Exercise"))
+                .andExpect(jsonPath("$.description").value("Daily workout"));
     }
 
     @Test

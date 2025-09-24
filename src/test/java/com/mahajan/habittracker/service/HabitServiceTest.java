@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -141,16 +141,16 @@ class HabitServiceTest {
 
         when(userService.getUserById(anyLong())).thenThrow(new UserNotFoundException(userId));
 
-        Assertions.assertThrows(UserNotFoundException.class, () ->
-                habitService.getHabitForUserById(HabitKey.of(userId, habitId)));
+        HabitKey key = HabitKey.of(userId, habitId);
+        assertThrows(UserNotFoundException.class, () ->
+                habitService.getHabitForUserById(key));
 
         verify(userService, times(1)).getUserById(userId);
         verify(habitRepository, never()).findByIdAndUserId(anyLong(), anyLong());
     }
 
     private void assertHabitNotFound(Executable executable) {
-        HabitNotFoundException exception = Assertions
-                .assertThrows(HabitNotFoundException.class, executable);
+        HabitNotFoundException exception = assertThrows(HabitNotFoundException.class, executable);
         Assertions.assertEquals("Habit with id " + TEST_HABIT_ID + " not found", exception.getMessage());
         verify(habitRepository, times(1)).
                 findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID);

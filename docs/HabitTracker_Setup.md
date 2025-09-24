@@ -26,7 +26,7 @@ Language: Java
 
 Spring Boot: 3.x (latest stable)
 
-Group: com.example
+Group: com.mahajan
 
 Artifact: habit-tracker
 

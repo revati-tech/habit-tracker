@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
             MissingServletRequestParameterException.class
     })
     public ResponseEntity<Map<String, Object>> handleBadRequest(Exception e, HttpServletRequest request) {
-        log.error("Bad Request", e.getMessage(), e);
+        log.error("Bad Request", e);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
     }
 

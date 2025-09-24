@@ -21,13 +21,13 @@ class UserMapperTest {
     @Test
     void testToResponse() {
         User user = User.builder()
-                .id(1L)
+                .id(ID)
                 .email(EMAIL)
                 .build();
 
         UserResponse dto = UserMapper.toResponse(user);
 
-        assertEquals(1L, dto.getId());
+        assertEquals(ID, dto.getId());
         assertEquals(EMAIL, dto.getEmail());
     }
 }

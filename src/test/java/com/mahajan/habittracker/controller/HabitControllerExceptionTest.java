@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class HabitControllerExceptionTest {
+class HabitControllerExceptionTest {
     private static final String BASE_URL = "/api/users/{userId}/habits/{habitId}";
 
     private static final Long TEST_USER_ID = 100L;
@@ -48,7 +48,7 @@ public class HabitControllerExceptionTest {
 
         ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
-        assertHabitNotFound(result, TEST_HABIT_ID);
+        assertHabitNotFound(result);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class HabitControllerExceptionTest {
         ResultActions result = mockMvc.perform(put(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body));
-        assertHabitNotFound(result, TEST_HABIT_ID);
+        assertHabitNotFound(result);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class HabitControllerExceptionTest {
 
         ResultActions result = mockMvc.perform(delete(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
-        assertHabitNotFound(result, TEST_HABIT_ID);
+        assertHabitNotFound(result);
     }
 
 
@@ -93,16 +93,16 @@ public class HabitControllerExceptionTest {
     void testUpdateHabitMissingBody() throws Exception {
         // No need to stub service, request will fail before service is called
         mockMvc.perform(put(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
-                        .contentType(MediaType.APPLICATION_JSON)) // no body
+                        .contentType(MediaType.APPLICATION_JSON)) // body is empty
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Bad Request"));
     }
 
-    private void assertHabitNotFound(ResultActions result, Long id) throws Exception {
+    private void assertHabitNotFound(ResultActions result) throws Exception {
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("Habit with id " + id + " not found"))
+                .andExpect(jsonPath("$.message").value("Habit with id " + HabitControllerExceptionTest.TEST_HABIT_ID + " not found"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 }

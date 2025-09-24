@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceTest {
-    private final String USER_EMAIL = "test@test.com";
+class UserServiceTest {
+    private static final String USER_EMAIL = "test@test.com";
     @Mock
     private UserRepository userRepository;
     @InjectMocks
@@ -27,12 +27,12 @@ public class UserServiceTest {
     private User user;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         user = User.builder().id(1L).email(USER_EMAIL).build();
     }
 
     @Test
-    public void testCreateUser() {
+    void testCreateUser() {
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User result = userService.createUser(user);
@@ -44,7 +44,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetUserById() {
+    void testGetUserById() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
         User result = userService.getUserById(1L);
@@ -53,7 +53,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetUserByEmail() {
+    void testGetUserByEmail() {
         when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
         User result = userService.getUserByEmail(USER_EMAIL);
         assertUser(user, result);
