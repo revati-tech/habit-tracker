@@ -33,7 +33,7 @@ class HabitControllerSuccessTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Habit habit;
+    private Habit testHabit;
 
     private User testUser;
 
@@ -49,23 +49,25 @@ class HabitControllerSuccessTest {
 
         testUser = objectMapper.readValue(response, User.class);
 
-        habit = Habit.builder().name("Exercise").description("Daily workout").build();
+        testHabit = Habit.builder().name("Exercise").description("Daily workout").build();
     }
 
     private Habit addHabitAndReturn() throws Exception {
         String response = mockMvc.perform(post(BASE_URL, testUser.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(habit)))
+                        .content(objectMapper.writeValueAsString(testHabit)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        return objectMapper.readValue(response, Habit.class);
+       Habit habit = objectMapper.readValue(response, Habit.class);
+       habit.setUser(testUser);
+       return habit;
     }
 
     @Test
     void testCreateHabit() throws Exception {
      mockMvc.perform(post(BASE_URL, testUser.getId()).contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(habit))
+                        .content(objectMapper.writeValueAsString(testHabit))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Exercise"))

@@ -30,7 +30,7 @@ public class HabitService {
                 .orElseThrow(() -> {
                     log.warn("Habit with id={} not found for userId={}",
                             habitId, userId);
-                    return new HabitNotFoundException(habitId);
+                    return new HabitNotFoundException(key);
                 });
     }
 

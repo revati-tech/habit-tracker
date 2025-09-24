@@ -151,7 +151,10 @@ class HabitServiceTest {
 
     private void assertHabitNotFound(Executable executable) {
         HabitNotFoundException exception = assertThrows(HabitNotFoundException.class, executable);
-        Assertions.assertEquals("Habit with id " + TEST_HABIT_ID + " not found", exception.getMessage());
+        Assertions.assertEquals(
+                String.format("Habit with id=%s not found for user with id=%s", TEST_HABIT_ID, TEST_USER_ID),
+                exception.getMessage()
+        );
         verify(habitRepository, times(1)).
                 findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID);
     }

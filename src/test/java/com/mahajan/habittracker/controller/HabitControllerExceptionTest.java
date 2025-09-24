@@ -43,8 +43,8 @@ class HabitControllerExceptionTest {
 
     @Test
     void testGetHabitByIdHabitNotFound() throws Exception {
-        when(habitService.getHabitForUserById(HabitKey.of(TEST_USER_ID, TEST_HABIT_ID)))
-                .thenThrow(new HabitNotFoundException(TEST_HABIT_ID));
+        when(habitService.getHabitForUserById(TEST_HABIT_KEY))
+                .thenThrow(new HabitNotFoundException(TEST_HABIT_KEY));
 
         ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
@@ -54,7 +54,7 @@ class HabitControllerExceptionTest {
     @Test
     void testUpdateHabitNotFound() throws Exception {
         when(habitService.updateHabit(any(HabitKey.class), any(Habit.class)))
-                .thenThrow(new HabitNotFoundException(TEST_HABIT_ID));
+                .thenThrow(new HabitNotFoundException(TEST_HABIT_KEY));
 
         String body = "{\"name\":\"New Name\",\"description\":\"New Description\"}";
 
@@ -66,7 +66,7 @@ class HabitControllerExceptionTest {
 
     @Test
     void testGetHabitByIdUserNotFound() throws Exception {
-        when(habitService.getHabitForUserById(HabitKey.of(TEST_USER_ID, TEST_HABIT_ID)))
+        when(habitService.getHabitForUserById(TEST_HABIT_KEY))
                 .thenThrow(new UserNotFoundException(TEST_USER_ID));
 
         ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
@@ -80,7 +80,7 @@ class HabitControllerExceptionTest {
 
     @Test
     void testDeleteHabitNotFound() throws Exception {
-        doThrow(new HabitNotFoundException(TEST_HABIT_ID))
+        doThrow(new HabitNotFoundException(TEST_HABIT_KEY))
                 .when(habitService).deleteHabit(TEST_HABIT_KEY);
 
         ResultActions result = mockMvc.perform(delete(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
@@ -102,7 +102,7 @@ class HabitControllerExceptionTest {
         result.andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value(404))
                 .andExpect(jsonPath("$.error").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("Habit with id " + HabitControllerExceptionTest.TEST_HABIT_ID + " not found"))
+                .andExpect(jsonPath("$.message").value(String.format("Habit with id=%s not found for user with id=%s", TEST_HABIT_ID, TEST_USER_ID)))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 }
