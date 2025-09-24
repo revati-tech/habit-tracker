@@ -2,6 +2,8 @@ package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
+import com.mahajan.habittracker.model.HabitKey;
+import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.HabitRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +22,15 @@ public class HabitService {
         return habitRepository.findAll();
     }
 
-    public Habit getHabitById(Long id) {
-        return habitRepository.findById(id)
+    public Habit getHabitForUserById(HabitKey key) {
+        Long userId = key.getUserId();
+        Long habitId = key.getHabitId();
+        User user = userService.getUserById(key.getUserId());
+        return habitRepository.findByIdAndUserId(key.getHabitId(), user.getId())
                 .orElseThrow(() -> {
-                    log.warn("Habit with id={} not found", id);
-                    return new HabitNotFoundException(id);
+                    log.warn("Habit with id={} not found for userId={}",
+                            habitId, userId);
+                    return new HabitNotFoundException(habitId);
                 });
     }
 
@@ -33,15 +39,15 @@ public class HabitService {
         return habitRepository.save(habit);
     }
 
-    public Habit updateHabit(Long id, Habit inHabit) {
-        Habit outHabit = getHabitById(id);
+    public Habit updateHabit(HabitKey key, Habit inHabit) {
+        Habit outHabit = getHabitForUserById(key);
         outHabit.setName(inHabit.getName());
         outHabit.setDescription(inHabit.getDescription());
         return habitRepository.save(outHabit);
     }
 
-    public void deleteHabit(Long id) {
-        Habit existing = getHabitById(id);
+    public void deleteHabit(HabitKey key) {
+        Habit existing = getHabitForUserById(key);
         habitRepository.delete(existing);
     }
 }

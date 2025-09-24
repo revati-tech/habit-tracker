@@ -2,8 +2,10 @@ package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
+import com.mahajan.habittracker.model.HabitKey;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.HabitRepository;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@Transactional
 class HabitServiceTest {
 
     @Mock
@@ -35,14 +38,17 @@ class HabitServiceTest {
 
     private User user;
 
-    private final Long userId = 1L;
+    private static final Long TEST_USER_ID = 1L;
 
-    private final Long habitId = 10L;
+    private static final Long TEST_HABIT_ID = 10L;
+
+    private final static HabitKey TEST_HABIT_KEY =
+            HabitKey.of(TEST_USER_ID, TEST_HABIT_ID);
 
     @BeforeEach
     void setUp() {
-        user = User.builder().id(userId).email("test@test.com").build();
-        habit = Habit.builder().id(habitId).name("Exercise").description("Daily workout").build();
+        user = User.builder().id(TEST_USER_ID).email("test@test.com").build();
+        habit = Habit.builder().id(TEST_HABIT_ID).name("Exercise").description("Daily workout").build();
     }
 
     @Test
@@ -53,7 +59,7 @@ class HabitServiceTest {
                         .build());
         when(habitRepository.findAll()).thenReturn(habits);
 
-        List<Habit> result = habitService.getHabitsByUser(userId);
+        List<Habit> result = habitService.getHabitsByUser(TEST_USER_ID);
 
         Assertions.assertEquals(2, result.size());
         assertHabitEquals(habits.get(0), result.get(0));
@@ -61,25 +67,27 @@ class HabitServiceTest {
     }
 
     @Test
-    void testGetHabitById() {
-        when(habitRepository.findById(habitId)).thenReturn(Optional.of(habit));
-        Habit result = habitService.getHabitById(habitId);
+    void testGetHabitForUserById() {
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.of(habit));
+        when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
+        Habit result = habitService.getHabitForUserById(TEST_HABIT_KEY);
         assertHabitEquals(habit, result);
     }
 
     @Test
-    void testGetHabitByIdNonExistent() {
-        Long id = 99L;
-        when(habitRepository.findById(id)).thenReturn(Optional.empty());
-        assertHabitNotFound(id, () ->   habitService.getHabitById(id));
+    void testGetHabitForUserByIdNonExistent() {
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID))
+                .thenReturn(Optional.empty());
+        when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
+        assertHabitNotFound(() ->   habitService.getHabitForUserById(TEST_HABIT_KEY));
     }
 
     @Test
     void testCreateHabit() {
-        Habit savedHabit = Habit.builder().id(habitId).name("Exercise").description("Daily workout").build();
+        Habit savedHabit = Habit.builder().id(TEST_HABIT_ID).name("Exercise").description("Daily workout").build();
 
         when(habitRepository.save(any(Habit.class))).thenReturn(savedHabit);
-        when(userService.getUserById(userId)).thenReturn(user);
+        when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
 
         Habit result = habitService.createHabit(user.getId(), habit);
 
@@ -93,10 +101,11 @@ class HabitServiceTest {
     void testUpdateHabit() {
         Habit updates = Habit.builder().name("New Name").description("New description").build();
 
-        when(habitRepository.findById(1L)).thenReturn(Optional.of(habit));
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.of(habit));
         when(habitRepository.save(any(Habit.class))).thenReturn(habit);
+        when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
 
-        Habit result = habitService.updateHabit(1L, updates);
+        Habit result = habitService.updateHabit(TEST_HABIT_KEY, updates);
 
         assertHabitEquals(habit, result);
         verify(habitRepository, times(1)).save(habit);
@@ -104,34 +113,37 @@ class HabitServiceTest {
 
     @Test
     void testUpdateHabitNonExistent() {
-        Long id = 99L;
         Habit updates = Habit.builder().name("New Name").description("New description").build();
-        when(habitRepository.findById(id)).thenReturn(Optional.empty());
-        assertHabitNotFound(id, () -> habitService.updateHabit(id, updates));
+        when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.empty());
+        assertHabitNotFound(() -> habitService.updateHabit(TEST_HABIT_KEY, updates));
         verify(habitRepository, times(0)).save(any(Habit.class));
 
     }
 
     @Test
     void testDeleteHabit() {
-        when(habitRepository.findById(habitId)).thenReturn(Optional.of(habit));
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.of(habit));
+        when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
         doNothing().when(habitRepository).delete(habit);
-        habitService.deleteHabit(habitId);
+        habitService.deleteHabit(TEST_HABIT_KEY);
         verify(habitRepository, times(1)).delete(habit);
     }
 
     @Test
     void testDeleteHabitNonExistent() {
-        Long id = 99L;
-        when(habitRepository.findById(id)).thenReturn(Optional.empty());
-        assertHabitNotFound(id, () -> habitService.deleteHabit(id));
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.empty());
+        when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
+        assertHabitNotFound(() -> habitService.deleteHabit(TEST_HABIT_KEY));
         verify(habitRepository, times(0)).delete(habit);
     }
 
-    private void assertHabitNotFound(Long id, Executable executable) {
-        HabitNotFoundException exception = Assertions.assertThrows(HabitNotFoundException.class, executable);
-        Assertions.assertEquals("Habit with id " + id + " not found", exception.getMessage());
-        verify(habitRepository, times(1)).findById(id);
+    private void assertHabitNotFound(Executable executable) {
+        HabitNotFoundException exception = Assertions
+                .assertThrows(HabitNotFoundException.class, executable);
+        Assertions.assertEquals("Habit with id " + TEST_HABIT_ID + " not found", exception.getMessage());
+        verify(habitRepository, times(1)).
+                findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID);
     }
 
     private void assertHabitEquals(Habit expected, Habit actual) {

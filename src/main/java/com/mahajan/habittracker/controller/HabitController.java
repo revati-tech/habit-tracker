@@ -3,6 +3,7 @@ package com.mahajan.habittracker.controller;
 import com.mahajan.habittracker.dto.HabitRequest;
 import com.mahajan.habittracker.dto.HabitResponse;
 import com.mahajan.habittracker.model.Habit;
+import com.mahajan.habittracker.model.HabitKey;
 import com.mahajan.habittracker.service.HabitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,13 +38,13 @@ public class HabitController {
 
     @DeleteMapping("/{habitId}")
     public ResponseEntity<Void> deleteHabit(@PathVariable Long userId, @PathVariable Long habitId) {
-        habitService.deleteHabit(habitId);
+        habitService.deleteHabit(HabitKey.of(userId, habitId));
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{habitId}")
     public HabitResponse getHabitById(@PathVariable Long userId, @PathVariable Long habitId) {
-       Habit habit = habitService.getHabitById(habitId);
+       Habit habit = habitService.getHabitForUserById(HabitKey.of(userId, habitId));
        return HabitResponse.builder()
                .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
@@ -52,7 +53,7 @@ public class HabitController {
     public HabitResponse updateHabit(@PathVariable Long userId, @PathVariable Long habitId, @Valid @RequestBody(required = true) HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest.getName())
                 .description(habitRequest.getDescription()).build();
-        Habit updated = habitService.updateHabit(habitId, habit);
+        Habit updated = habitService.updateHabit(HabitKey.of(userId, habitId), habit);
         return HabitResponse.builder().id(updated.getId()).name(updated.getName()).description(habit.getDescription()).build();
     }
 }

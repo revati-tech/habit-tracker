@@ -2,6 +2,7 @@ package com.mahajan.habittracker.controller;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
+import com.mahajan.habittracker.model.HabitKey;
 import com.mahajan.habittracker.service.HabitService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,11 @@ public class HabitControllerExceptionTest {
 
     private final static Long TEST_USER_ID = 100L;
 
+    private final static Long TEST_HABIT_ID = 42L;
+
+    private final static HabitKey TEST_HABIT_KEY =
+            HabitKey.of(TEST_USER_ID, TEST_HABIT_ID);
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -37,46 +43,41 @@ public class HabitControllerExceptionTest {
 
     @Test
     void testGetHabitByIdNotFound() throws Exception {
-        Long id = 42L;
-        when(habitService.getHabitById(id))
-                .thenThrow(new HabitNotFoundException(id));
+        when(habitService.getHabitForUserById(HabitKey.of(TEST_USER_ID, TEST_HABIT_ID)))
+                .thenThrow(new HabitNotFoundException(TEST_HABIT_ID));
 
-        ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, id)
+        ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
-        assertHabitNotFound(result, id);
+        assertHabitNotFound(result, TEST_HABIT_ID);
     }
 
     @Test
     void testUpdateHabitNotFound() throws Exception {
-        Long id = 42L;
-        when(habitService.updateHabit(eq(id), any(Habit.class)))
-                .thenThrow(new HabitNotFoundException(id));
+        when(habitService.updateHabit(any(HabitKey.class), any(Habit.class)))
+                .thenThrow(new HabitNotFoundException(TEST_HABIT_ID));
 
         String body = "{\"name\":\"New Name\",\"description\":\"New Description\"}";
 
-        ResultActions result = mockMvc.perform(put(BASE_URL, TEST_USER_ID, id)
+        ResultActions result = mockMvc.perform(put(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body));
-        assertHabitNotFound(result, id);
+        assertHabitNotFound(result, TEST_HABIT_ID);
     }
 
     @Test
     void testDeleteHabitNotFound() throws Exception {
-        Long id = 42L;
-        doThrow(new HabitNotFoundException(id))
-                .when(habitService).deleteHabit(id);
+        doThrow(new HabitNotFoundException(TEST_HABIT_ID))
+                .when(habitService).deleteHabit(TEST_HABIT_KEY);
 
-        ResultActions result = mockMvc.perform(delete(BASE_URL, TEST_USER_ID, id)
+        ResultActions result = mockMvc.perform(delete(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
-        assertHabitNotFound(result, id);
+        assertHabitNotFound(result, TEST_HABIT_ID);
     }
 
     @Test
     void testUpdateHabitMissingBody() throws Exception {
-        Long id = 42L;
-
         // No need to stub service, request will fail before service is called
-        mockMvc.perform(put(BASE_URL, TEST_USER_ID, id)
+        mockMvc.perform(put(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                         .contentType(MediaType.APPLICATION_JSON)) // no body
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Bad Request"));
