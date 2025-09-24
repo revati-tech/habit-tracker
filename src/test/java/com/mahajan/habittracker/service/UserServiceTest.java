@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -28,11 +27,11 @@ public class UserServiceTest {
 
     private User user;
 
-    private final String userEmail = "test@test.com";
+    private final String USER_EMAIL = "test@test.com";
 
     @BeforeEach
     public void setup() {
-        user = User.builder().id(1L).email(userEmail).build();
+        user = User.builder().id(1L).email(USER_EMAIL).build();
     }
 
     @Test
@@ -58,10 +57,10 @@ public class UserServiceTest {
 
     @Test
     public void testGetUserByEmail() {
-        when(userRepository.findByEmail(userEmail)).thenReturn(Optional.of(user));
-        User result = userService.getUserByEmail(userEmail);
+        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        User result = userService.getUserByEmail(USER_EMAIL);
         assertUser(user, result);
-        verify(userRepository, times(1)).findByEmail(userEmail);
+        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
     }
 
     @Test

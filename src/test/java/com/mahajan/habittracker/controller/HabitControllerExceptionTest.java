@@ -27,13 +27,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 public class HabitControllerExceptionTest {
-    private final static String BASE_URL = "/api/users/{userId}/habits/{habitId}";
+    private static final String BASE_URL = "/api/users/{userId}/habits/{habitId}";
 
-    private final static Long TEST_USER_ID = 100L;
+    private static final Long TEST_USER_ID = 100L;
 
-    private final static Long TEST_HABIT_ID = 42L;
+    private static final Long TEST_HABIT_ID = 42L;
 
-    private final static HabitKey TEST_HABIT_KEY =
+    private static final HabitKey TEST_HABIT_KEY =
             HabitKey.of(TEST_USER_ID, TEST_HABIT_ID);
 
     @Autowired

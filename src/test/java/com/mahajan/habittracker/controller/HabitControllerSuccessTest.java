@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class HabitControllerSuccessTest {
 
-    private final static String BASE_URL = "/api/users/{userId}/habits";
+    private static final String BASE_URL = "/api/users/{userId}/habits";
 
     @Autowired
     private MockMvc mockMvc;

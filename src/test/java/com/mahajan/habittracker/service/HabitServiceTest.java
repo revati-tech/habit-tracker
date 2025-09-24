@@ -43,7 +43,7 @@ class HabitServiceTest {
 
     private static final Long TEST_HABIT_ID = 10L;
 
-    private final static HabitKey TEST_HABIT_KEY =
+    private static final HabitKey TEST_HABIT_KEY =
             HabitKey.of(TEST_USER_ID, TEST_HABIT_ID);
 
     @BeforeEach
