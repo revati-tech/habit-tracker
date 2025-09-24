@@ -1,6 +1,7 @@
 package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
+import com.mahajan.habittracker.exceptions.UserNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.HabitKey;
 import com.mahajan.habittracker.model.User;
@@ -123,7 +124,8 @@ class HabitServiceTest {
 
     @Test
     void testDeleteHabit() {
-        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.of(habit));
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID))
+                .thenReturn(Optional.of(habit));
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
         doNothing().when(habitRepository).delete(habit);
         habitService.deleteHabit(TEST_HABIT_KEY);
@@ -132,10 +134,25 @@ class HabitServiceTest {
 
     @Test
     void testDeleteHabitNonExistent() {
-        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.empty());
+        when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID))
+                .thenReturn(Optional.empty());
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
         assertHabitNotFound(() -> habitService.deleteHabit(TEST_HABIT_KEY));
         verify(habitRepository, times(0)).delete(habit);
+    }
+
+    @Test
+    void testGetHabitByIdUserNotFound() {
+        Long userId = 2L;
+        Long habitId = 2L;
+
+        when(userService.getUserById(anyLong())).thenThrow(new UserNotFoundException(userId));
+
+        Assertions.assertThrows(UserNotFoundException.class, () ->
+                habitService.getHabitForUserById(HabitKey.of(userId, habitId)));
+
+        verify(userService, times(1)).getUserById(userId);
+        verify(habitRepository, never()).findByIdAndUserId(anyLong(), anyLong());
     }
 
     private void assertHabitNotFound(Executable executable) {

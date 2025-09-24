@@ -1,6 +1,7 @@
 package com.mahajan.habittracker.controller;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
+import com.mahajan.habittracker.exceptions.UserNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.HabitKey;
 import com.mahajan.habittracker.service.HabitService;
@@ -42,7 +43,7 @@ public class HabitControllerExceptionTest {
     private HabitService habitService;
 
     @Test
-    void testGetHabitByIdNotFound() throws Exception {
+    void testGetHabitByIdHabitNotFound() throws Exception {
         when(habitService.getHabitForUserById(HabitKey.of(TEST_USER_ID, TEST_HABIT_ID)))
                 .thenThrow(new HabitNotFoundException(TEST_HABIT_ID));
 
@@ -65,6 +66,20 @@ public class HabitControllerExceptionTest {
     }
 
     @Test
+    void testGetHabitByIdUserNotFound() throws Exception {
+        when(habitService.getHabitForUserById(HabitKey.of(TEST_USER_ID, TEST_HABIT_ID)))
+                .thenThrow(new UserNotFoundException(TEST_USER_ID));
+
+        ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
+                .contentType(MediaType.APPLICATION_JSON));
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("User with id " + TEST_USER_ID + " not found"))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
     void testDeleteHabitNotFound() throws Exception {
         doThrow(new HabitNotFoundException(TEST_HABIT_ID))
                 .when(habitService).deleteHabit(TEST_HABIT_KEY);
@@ -73,6 +88,8 @@ public class HabitControllerExceptionTest {
                 .contentType(MediaType.APPLICATION_JSON));
         assertHabitNotFound(result, TEST_HABIT_ID);
     }
+
+
 
     @Test
     void testUpdateHabitMissingBody() throws Exception {
