@@ -43,7 +43,7 @@ class HabitControllerExceptionTest {
 
     @Test
     void testGetHabitByIdHabitNotFound() throws Exception {
-        when(habitService.getHabitForUserById(TEST_HABIT_KEY))
+        when(habitService.getHabitByIdForUser(TEST_HABIT_KEY))
                 .thenThrow(new HabitNotFoundException(TEST_HABIT_KEY));
 
         ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
@@ -53,7 +53,7 @@ class HabitControllerExceptionTest {
 
     @Test
     void testUpdateHabitNotFound() throws Exception {
-        when(habitService.updateHabit(any(HabitKey.class), any(Habit.class)))
+        when(habitService.updateHabitForUser(any(HabitKey.class), any(Habit.class)))
                 .thenThrow(new HabitNotFoundException(TEST_HABIT_KEY));
 
         String body = "{\"name\":\"New Name\",\"description\":\"New Description\"}";
@@ -66,7 +66,7 @@ class HabitControllerExceptionTest {
 
     @Test
     void testGetHabitByIdUserNotFound() throws Exception {
-        when(habitService.getHabitForUserById(TEST_HABIT_KEY))
+        when(habitService.getHabitByIdForUser(TEST_HABIT_KEY))
                 .thenThrow(new UserNotFoundException(TEST_USER_ID));
 
         ResultActions result = mockMvc.perform(get(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
@@ -81,7 +81,7 @@ class HabitControllerExceptionTest {
     @Test
     void testDeleteHabitNotFound() throws Exception {
         doThrow(new HabitNotFoundException(TEST_HABIT_KEY))
-                .when(habitService).deleteHabit(TEST_HABIT_KEY);
+                .when(habitService).deleteHabitForUser(TEST_HABIT_KEY);
 
         ResultActions result = mockMvc.perform(delete(BASE_URL, TEST_USER_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON));

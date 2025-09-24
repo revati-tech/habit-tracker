@@ -46,14 +46,14 @@ class HabitServiceTest {
     }
 
     @Test
-    void testGetHabitsByUser() {
+    void testGetHabitsForUser() {
         List<Habit> habits = List.of(
                 habit,
                 Habit.builder().name("Meditation").description("Daily 10 min meditation")
                         .build());
         when(habitRepository.findAllByUserId(TEST_USER_ID)).thenReturn(habits);
 
-        List<Habit> result = habitService.getHabitsByUser(TEST_USER_ID);
+        List<Habit> result = habitService.getHabitsForUser(TEST_USER_ID);
 
         Assertions.assertEquals(2, result.size());
         assertHabitEquals(habits.get(0), result.get(0));
@@ -61,29 +61,29 @@ class HabitServiceTest {
     }
 
     @Test
-    void testGetHabitForUserById() {
+    void testGetHabitByIdForUser() {
         when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.of(habit));
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
-        Habit result = habitService.getHabitForUserById(TEST_HABIT_KEY);
+        Habit result = habitService.getHabitByIdForUser(TEST_HABIT_KEY);
         assertHabitEquals(habit, result);
     }
 
     @Test
-    void testGetHabitForUserByIdNonExistent() {
+    void testGetHabitByIdForUserNonExistent() {
         when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID))
                 .thenReturn(Optional.empty());
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
-        assertHabitNotFound(() -> habitService.getHabitForUserById(TEST_HABIT_KEY));
+        assertHabitNotFound(() -> habitService.getHabitByIdForUser(TEST_HABIT_KEY));
     }
 
     @Test
-    void testCreateHabit() {
+    void testCreateHabitForUser() {
         Habit savedHabit = Habit.builder().id(TEST_HABIT_ID).name("Exercise").description("Daily workout").build();
 
         when(habitRepository.save(any(Habit.class))).thenReturn(savedHabit);
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
 
-        Habit result = habitService.createHabit(user.getId(), habit);
+        Habit result = habitService.createHabitForUser(user.getId(), habit);
 
         Assertions.assertNotNull(result);
         assertHabitEquals(savedHabit, result);
@@ -92,45 +92,45 @@ class HabitServiceTest {
     }
 
     @Test
-    void testUpdateHabit() {
+    void testUpdateHabitForUser() {
         Habit updates = Habit.builder().name("New Name").description("New description").build();
 
         when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.of(habit));
         when(habitRepository.save(any(Habit.class))).thenReturn(habit);
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
 
-        Habit result = habitService.updateHabit(TEST_HABIT_KEY, updates);
+        Habit result = habitService.updateHabitForUser(TEST_HABIT_KEY, updates);
 
         assertHabitEquals(habit, result);
         verify(habitRepository, times(1)).save(habit);
     }
 
     @Test
-    void testUpdateHabitNonExistent() {
+    void testUpdateHabitForUserNonExistent() {
         Habit updates = Habit.builder().name("New Name").description("New description").build();
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
         when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID)).thenReturn(Optional.empty());
-        assertHabitNotFound(() -> habitService.updateHabit(TEST_HABIT_KEY, updates));
+        assertHabitNotFound(() -> habitService.updateHabitForUser(TEST_HABIT_KEY, updates));
         verify(habitRepository, times(0)).save(any(Habit.class));
 
     }
 
     @Test
-    void testDeleteHabit() {
+    void testDeleteHabitForUser() {
         when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID))
                 .thenReturn(Optional.of(habit));
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
         doNothing().when(habitRepository).delete(habit);
-        habitService.deleteHabit(TEST_HABIT_KEY);
+        habitService.deleteHabitForUser(TEST_HABIT_KEY);
         verify(habitRepository, times(1)).delete(habit);
     }
 
     @Test
-    void testDeleteHabitNonExistent() {
+    void testDeleteHabitForUserNonExistent() {
         when(habitRepository.findByIdAndUserId(TEST_HABIT_ID, TEST_USER_ID))
                 .thenReturn(Optional.empty());
         when(userService.getUserById(TEST_USER_ID)).thenReturn(user);
-        assertHabitNotFound(() -> habitService.deleteHabit(TEST_HABIT_KEY));
+        assertHabitNotFound(() -> habitService.deleteHabitForUser(TEST_HABIT_KEY));
         verify(habitRepository, times(0)).delete(habit);
     }
 
@@ -143,7 +143,7 @@ class HabitServiceTest {
 
         HabitKey key = HabitKey.of(userId, habitId);
         assertThrows(UserNotFoundException.class, () ->
-                habitService.getHabitForUserById(key));
+                habitService.getHabitByIdForUser(key));
 
         verify(userService, times(1)).getUserById(userId);
         verify(habitRepository, never()).findByIdAndUserId(anyLong(), anyLong());
@@ -152,7 +152,7 @@ class HabitServiceTest {
     @Test
     void testGetHabitsForUserWithNoHabits() {
         when(habitRepository.findAllByUserId(TEST_USER_ID)).thenReturn(List.of());
-        List<Habit> result = habitService.getHabitsByUser(TEST_USER_ID);
+        List<Habit> result = habitService.getHabitsForUser(TEST_USER_ID);
         Assertions.assertTrue(result.isEmpty());
         verify(habitRepository, times(1)).findAllByUserId(TEST_USER_ID);
     }
@@ -163,7 +163,7 @@ class HabitServiceTest {
                 .thenThrow(new UserNotFoundException(TEST_USER_ID));
 
         assertThrows(UserNotFoundException.class, () ->
-                habitService.getHabitsByUser(TEST_USER_ID));
+                habitService.getHabitsForUser(TEST_USER_ID));
 
         verify(userService, times(1)).getUserById(TEST_USER_ID);
         verify(habitRepository, never()).findAllByUserId(anyLong());

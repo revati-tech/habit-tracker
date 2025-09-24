@@ -18,12 +18,12 @@ public class HabitService {
     private final HabitRepository habitRepository;
     private final UserService userService;
 
-    public List<Habit> getHabitsByUser(Long userId) {
+    public List<Habit> getHabitsForUser(Long userId) {
         userService.getUserById(userId);
         return habitRepository.findAllByUserId(userId);
     }
 
-    public Habit getHabitForUserById(HabitKey key) {
+    public Habit getHabitByIdForUser(HabitKey key) {
         Long userId = key.getUserId();
         Long habitId = key.getHabitId();
         User user = userService.getUserById(key.getUserId());
@@ -35,20 +35,20 @@ public class HabitService {
                 });
     }
 
-    public Habit createHabit(Long userId, Habit habit) {
+    public Habit createHabitForUser(Long userId, Habit habit) {
         habit.setUser(userService.getUserById(userId));
         return habitRepository.save(habit);
     }
 
-    public Habit updateHabit(HabitKey key, Habit inHabit) {
-        Habit outHabit = getHabitForUserById(key);
+    public Habit updateHabitForUser(HabitKey key, Habit inHabit) {
+        Habit outHabit = getHabitByIdForUser(key);
         outHabit.setName(inHabit.getName());
         outHabit.setDescription(inHabit.getDescription());
         return habitRepository.save(outHabit);
     }
 
-    public void deleteHabit(HabitKey key) {
-        Habit existing = getHabitForUserById(key);
+    public void deleteHabitForUser(HabitKey key) {
+        Habit existing = getHabitByIdForUser(key);
         habitRepository.delete(existing);
     }
 }

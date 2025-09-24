@@ -20,8 +20,8 @@ public class HabitController {
     private final HabitService habitService;
 
     @GetMapping
-    public List<HabitResponse> getHabitsByUser(@PathVariable Long userId) {
-        return habitService.getHabitsByUser(userId)
+    public List<HabitResponse> getAllHabits(@PathVariable Long userId) {
+        return habitService.getHabitsForUser(userId)
                 .stream().map(h -> HabitResponse.builder()
                         .id(h.getId()).name(h.getName()).description(h.getDescription()).build())
                 .toList();
@@ -31,20 +31,20 @@ public class HabitController {
     public HabitResponse createHabit(@PathVariable Long userId, @Valid @RequestBody() HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest
                 .getName()).description(habitRequest.getDescription()).build();
-        habitService.createHabit(userId, habit);
+        habitService.createHabitForUser(userId, habit);
         return HabitResponse.builder()
                 .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
 
     @DeleteMapping("/{habitId}")
     public ResponseEntity<Void> deleteHabit(@PathVariable Long userId, @PathVariable Long habitId) {
-        habitService.deleteHabit(HabitKey.of(userId, habitId));
+        habitService.deleteHabitForUser(HabitKey.of(userId, habitId));
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{habitId}")
     public HabitResponse getHabitById(@PathVariable Long userId, @PathVariable Long habitId) {
-        Habit habit = habitService.getHabitForUserById(HabitKey.of(userId, habitId));
+        Habit habit = habitService.getHabitByIdForUser(HabitKey.of(userId, habitId));
         return HabitResponse.builder()
                 .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
     }
@@ -53,7 +53,7 @@ public class HabitController {
     public HabitResponse updateHabit(@PathVariable Long userId, @PathVariable Long habitId, @Valid @RequestBody() HabitRequest habitRequest) {
         Habit habit = Habit.builder().name(habitRequest.getName())
                 .description(habitRequest.getDescription()).build();
-        Habit updated = habitService.updateHabit(HabitKey.of(userId, habitId), habit);
-        return HabitResponse.builder().id(updated.getId()).name(updated.getName()).description(habit.getDescription()).build();
+        Habit updated = habitService.updateHabitForUser(HabitKey.of(userId, habitId), habit);
+        return HabitResponse.builder().id(updated.getId()).name(updated.getName()).description(updated.getDescription()).build();
     }
 }
