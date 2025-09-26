@@ -47,7 +47,7 @@ public class JwtUtil {
         return Jwts.parserBuilder()
                 .setSigningKey(Keys.hmacShaKeyFor(secret.getBytes()))
                 .build()
-                .parseClaimsJws(token)
+                .parseClaimsJws(token)// ensures token is not tampered and unexpired
                 .getBody()
                 .getSubject();
     }
