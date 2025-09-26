@@ -121,6 +121,8 @@ class UserControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId()))
-                .andExpect(jsonPath("$.email").value(EMAIL));
+                .andExpect(jsonPath("$.email").value(EMAIL))
+                .andExpect(jsonPath("$.password").doesNotExist()); // ✅ password should not be in response
+
     }
 }
