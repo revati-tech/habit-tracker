@@ -11,6 +11,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -20,8 +21,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     private static final String USER_EMAIL = "test@test.com";
+
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UserService userService;
     private User user;
@@ -33,14 +39,18 @@ class UserServiceTest {
 
     @Test
     void testCreateUser() {
+        String rawPassword = "password123";
+        user.setPassword(rawPassword);
+        when(passwordEncoder.encode(rawPassword)).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User result = userService.createUser(user);
 
         assertNotNull(result);
         assertUser(user, result);
-
+        verify(passwordEncoder, times(1)).encode(rawPassword);
         verify(userRepository, times(1)).save(user);
+        assertEquals("encodedPassword", user.getPassword());
     }
 
     @Test
@@ -58,6 +68,17 @@ class UserServiceTest {
         User result = userService.getUserByEmail(USER_EMAIL);
         assertUser(user, result);
         verify(userRepository, times(1)).findByEmail(USER_EMAIL);
+    }
+
+    @Test
+    void testExistsByEmail() {
+        when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(user));
+        assertTrue(userService.existsByEmail(USER_EMAIL));
+        verify(userRepository, times(1)).findByEmail(USER_EMAIL);
+
+        when(userRepository.findByEmail("USER2_EMAIL")).thenReturn(Optional.empty());
+        assertFalse(userService.existsByEmail("USER2_EMAIL"));
+        verify(userRepository, times(1)).findByEmail("USER2_EMAIL");
     }
 
     @Test

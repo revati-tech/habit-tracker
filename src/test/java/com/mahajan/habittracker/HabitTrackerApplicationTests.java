@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 @EnableAutoConfiguration(exclude = {
         SecurityAutoConfiguration.class,
         SecurityFilterAutoConfiguration.class,
-        UserDetailsServiceAutoConfiguration.class,
+        UserDetailsServiceAutoConfiguration.class,   // <--- add this
         OAuth2ClientAutoConfiguration.class,
         OAuth2ResourceServerAutoConfiguration.class
 })
