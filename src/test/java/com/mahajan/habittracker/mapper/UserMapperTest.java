@@ -10,10 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class UserMapperTest {
     private static final Long ID = 1L;
     private static final String EMAIL = "test@test.com";
+    private static final String PASSWORD = "password123";
 
     @Test
     void testToUser() {
-        UserRequest request = new UserRequest("test@test.com");
+        UserRequest request = UserRequest.builder().email(EMAIL).password(PASSWORD).build();
         User user = UserMapper.toUser(request);
         assertEquals(EMAIL, user.getEmail());
     }
@@ -23,6 +24,7 @@ class UserMapperTest {
         User user = User.builder()
                 .id(ID)
                 .email(EMAIL)
+                .password(PASSWORD)
                 .build();
 
         UserResponse dto = UserMapper.toResponse(user);

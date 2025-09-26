@@ -40,6 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest {
     private static final String EMAIL = "test@test.com";
 
+    private static final String PASSWORD = "password123";
+
     private static final String BASE_URL = "/api/users/{userId}";
 
     @Autowired
@@ -50,7 +52,8 @@ class UserControllerTest {
 
     @Test
     void testCreateUser() throws Exception {
-        UserRequest request = UserRequest.builder().email(EMAIL).build();
+        UserRequest request = UserRequest.builder()
+                .email(EMAIL).password(PASSWORD).build();
 
         ResultActions result = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +79,7 @@ class UserControllerTest {
     }
 
     private User addUserAndReturn() throws Exception {
-        UserRequest request = UserRequest.builder().email(EMAIL).build();
+        UserRequest request = UserRequest.builder().email(EMAIL).password(PASSWORD).build();
 
         ResultActions result = mockMvc.perform(post("/api/users")
                 .contentType(MediaType.APPLICATION_JSON)

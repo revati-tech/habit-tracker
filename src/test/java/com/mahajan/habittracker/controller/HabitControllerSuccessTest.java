@@ -55,7 +55,8 @@ class HabitControllerSuccessTest {
     @BeforeEach
     void setUp() throws Exception {
         // create a user dynamically before each test
-        UserRequest userRequest = UserRequest.builder().email("test@test.com").build();
+        UserRequest userRequest = UserRequest.builder()
+                .email("test@test.com").password("password123").build();
         String response = mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userRequest)))

@@ -10,6 +10,7 @@ public class UserMapper {
     public static User toUser(UserRequest dto) {
         return User.builder()
                 .email(dto.getEmail())
+                .password(dto.getPassword())
                 .build();
     }
 
