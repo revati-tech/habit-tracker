@@ -1,20 +1,16 @@
 package com.mahajan.habittracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mahajan.habittracker.config.SecurityTestConfig;
 import com.mahajan.habittracker.dto.UserRequest;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,14 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
-@EnableAutoConfiguration(exclude = {
-        SecurityAutoConfiguration.class,
-        SecurityFilterAutoConfiguration.class,
-        UserDetailsServiceAutoConfiguration.class,
-        OAuth2ClientAutoConfiguration.class,
-        OAuth2ResourceServerAutoConfiguration.class
-})
-
+@Import(SecurityTestConfig.class)
 class UserControllerTest {
     private static final String EMAIL = "test@test.com";
 

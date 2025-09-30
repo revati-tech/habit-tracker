@@ -1,6 +1,7 @@
 package com.mahajan.habittracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mahajan.habittracker.config.SecurityTestConfig;
 import com.mahajan.habittracker.dto.HabitRequest;
 import com.mahajan.habittracker.dto.UserRequest;
 import com.mahajan.habittracker.model.Habit;
@@ -9,14 +10,9 @@ import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -30,14 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-@ActiveProfiles("test")
-@EnableAutoConfiguration(exclude = {
-        SecurityAutoConfiguration.class,
-        SecurityFilterAutoConfiguration.class,
-        UserDetailsServiceAutoConfiguration.class,
-        OAuth2ClientAutoConfiguration.class,
-        OAuth2ResourceServerAutoConfiguration.class
-})
+@ActiveProfiles("test")@Import(SecurityTestConfig.class)
 class HabitControllerSuccessTest {
 
     private static final String BASE_URL = "/api/users/{userId}/habits";
