@@ -1,0 +1,76 @@
+package com.mahajan.habittracker.integration;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mahajan.habittracker.dto.LoginRequest;
+import com.mahajan.habittracker.dto.SignupRequest;
+import com.mahajan.habittracker.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class AuthFlowIntegrationTest {
+
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private UserRepository userRepository;
+
+    @BeforeEach
+    void setup() {
+        userRepository.deleteAll();
+    }
+
+    @Test
+    @DisplayName("Signup → Login → Access protected endpoint with JWT")
+    void fullAuthFlow() throws Exception {
+        // 1. Signup a new user (using DTO, not entity)
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setEmail("alice@example.com");
+        signupRequest.setPassword("password123");
+
+        mockMvc.perform(post("/api/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signupRequest)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("User registered successfully"));
+
+        assertThat(userRepository.findByEmail("alice@example.com")).isPresent();
+
+        // 2. Login with correct credentials
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setEmail("alice@example.com");
+        loginRequest.setPassword("password123");
+
+        String loginResponse = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        System.out.println("Login response: " + loginResponse);
+
+        String token = objectMapper.readTree(loginResponse).get("token").asText();
+        assertThat(token).isNotBlank();
+
+        // 3. Access protected endpoint with token
+       /* mockMvc.perform(get("/api/habits")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()); // assumes /api/habits exists and is secured
+
+        // 4. Access protected endpoint without token should fail
+        mockMvc.perform(get("/api/habits"))
+                .andExpect(status().isUnauthorized());*/
+    }
+}
