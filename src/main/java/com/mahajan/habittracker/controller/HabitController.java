@@ -26,8 +26,7 @@ public class HabitController {
     @GetMapping
     public List<HabitResponse> getAllHabits() {
         return habitService.getHabitsForUser(getCurrentUser())
-                .stream().map(h -> HabitResponse.builder()
-                        .id(h.getId()).name(h.getName()).description(h.getDescription()).build())
+                .stream().map(HabitResponse::fromEntity)
                 .toList();
     }
 
@@ -36,8 +35,7 @@ public class HabitController {
         Habit habit = Habit.builder().name(habitRequest
                 .getName()).description(habitRequest.getDescription()).build();
         habitService.createHabitForUser(habit, getCurrentUser());
-        return HabitResponse.builder()
-                .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
+        return HabitResponse.fromEntity(habit);
     }
 
     @DeleteMapping("/{habitId}")
@@ -49,8 +47,7 @@ public class HabitController {
     @GetMapping("/{habitId}")
     public HabitResponse getHabitById(@PathVariable Long habitId) {
         Habit habit = habitService.getHabitByIdForUser(habitId, getCurrentUser());
-        return HabitResponse.builder()
-                .id(habit.getId()).name(habit.getName()).description(habit.getDescription()).build();
+        return HabitResponse.fromEntity(habit);
     }
 
     @PutMapping("/{habitId}")
@@ -58,7 +55,7 @@ public class HabitController {
         Habit habit = Habit.builder().id(habitId).name(habitRequest.getName())
                 .description(habitRequest.getDescription()).build();
         Habit updated = habitService.updateHabitForUser(habit, getCurrentUser());
-        return HabitResponse.builder().id(updated.getId()).name(updated.getName()).description(updated.getDescription()).build();
+        return HabitResponse.fromEntity(updated);
     }
 
     private User getCurrentUser() {
