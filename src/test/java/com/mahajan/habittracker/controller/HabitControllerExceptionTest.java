@@ -1,6 +1,7 @@
 package com.mahajan.habittracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mahajan.habittracker.dto.HabitRequest;
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.exceptions.UserNotFoundException;
 import com.mahajan.habittracker.model.Habit;
@@ -119,11 +120,31 @@ class HabitControllerExceptionTest {
 
         ResultActions result = mockMvc.perform(get(BASE_URL_WITH_ID, TEST_HABIT_ID)
                 .contentType(MediaType.APPLICATION_JSON));
-        result.andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.error").value("Not Found"))
-                .andExpect(jsonPath("$.message").value("User with id " + TEST_USER_ID + " not found"))
-                .andExpect(jsonPath("$.timestamp").exists());
+        assertUserNotFound(result);
+    }
+
+    @Test
+    void testCreateHabitBodyMissing() throws Exception {
+        mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Bad Request"));
+    }
+
+    @Test
+    void testCreateUserNotFound() throws Exception {
+        HabitRequest request = HabitRequest.builder()
+                .name(testHabit.getName())
+                .description(testHabit.getDescription())
+                .build();
+        when(userService.getUserByEmail(any(String.class)))
+                .thenThrow(new UserNotFoundException(TEST_USER_ID));
+
+        ResultActions result = mockMvc.perform(post(BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .accept(MediaType.APPLICATION_JSON));
+        assertUserNotFound(result);
     }
 
     private void assertHabitNotFound(ResultActions result) throws Exception {
@@ -133,6 +154,14 @@ class HabitControllerExceptionTest {
                 .andExpect(jsonPath("$.message").value(
                         String.format("Habit with id=%s not found for user with email=%s",
                                 TEST_HABIT_ID, testUser.getEmail())))
+                .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    private void assertUserNotFound(ResultActions result) throws Exception {
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("Not Found"))
+                .andExpect(jsonPath("$.message").value("User with id " + TEST_USER_ID + " not found"))
                 .andExpect(jsonPath("$.timestamp").exists());
     }
 }
