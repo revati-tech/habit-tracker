@@ -2,7 +2,6 @@ package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
-import com.mahajan.habittracker.model.HabitKey;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.repository.HabitRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,37 +17,32 @@ public class HabitService {
     private final HabitRepository habitRepository;
     private final UserService userService;
 
-    public List<Habit> getHabitsForUser(Long userId) {
-        userService.getUserById(userId);
-        return habitRepository.findAllByUserId(userId);
+    public List<Habit> getHabitsForUser(User user) {
+        return habitRepository.findByUser(user);
     }
 
-    public Habit getHabitByIdForUser(HabitKey key) {
-        Long userId = key.getUserId();
-        Long habitId = key.getHabitId();
-        User user = userService.getUserById(key.getUserId());
-        return habitRepository.findByIdAndUserId(key.getHabitId(), user.getId())
+    public Habit getHabitByIdForUser(Long habitId, User user) {
+        return habitRepository.findByIdAndUser(habitId, user)
                 .orElseThrow(() -> {
-                    log.warn("Habit with id={} not found for userId={}",
-                            habitId, userId);
-                    return new HabitNotFoundException(key);
+                    log.warn("Habit with id={} not found for userEmail={}", habitId, user.getEmail());
+                    return new HabitNotFoundException(habitId, user.getEmail());
                 });
     }
 
-    public Habit createHabitForUser(Long userId, Habit habit) {
-        habit.setUser(userService.getUserById(userId));
+    public Habit createHabitForUser(Habit habit, User user) {
+        habit.setUser(user);
         return habitRepository.save(habit);
     }
 
-    public Habit updateHabitForUser(HabitKey key, Habit inHabit) {
-        Habit outHabit = getHabitByIdForUser(key);
+    public Habit updateHabitForUser(Habit inHabit, User user) {
+        Habit outHabit = getHabitByIdForUser(inHabit.getId(), user);
         outHabit.setName(inHabit.getName());
         outHabit.setDescription(inHabit.getDescription());
         return habitRepository.save(outHabit);
     }
 
-    public void deleteHabitForUser(HabitKey key) {
-        Habit existing = getHabitByIdForUser(key);
+    public void deleteHabitForUser(long inHabitId, User user) {
+        Habit existing = getHabitByIdForUser(inHabitId, user);
         habitRepository.delete(existing);
     }
 }

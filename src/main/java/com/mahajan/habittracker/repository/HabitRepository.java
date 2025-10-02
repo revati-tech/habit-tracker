@@ -1,6 +1,7 @@
 package com.mahajan.habittracker.repository;
 
 import com.mahajan.habittracker.model.Habit;
+import com.mahajan.habittracker.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,7 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface HabitRepository extends JpaRepository<Habit, Long> {
-    Optional<Habit> findByIdAndUserId(Long id, Long userId);
-
-    List<Habit> findAllByUserId(Long userId);
+    List<Habit> findByUser(User user);
+    Optional<Habit> findByIdAndUser(Long id, User user);
 }

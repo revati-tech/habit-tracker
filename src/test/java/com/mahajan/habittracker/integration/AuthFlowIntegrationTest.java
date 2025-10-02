@@ -59,8 +59,6 @@ class AuthFlowIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        System.out.println("Login response: " + loginResponse);
-
         String token = objectMapper.readTree(loginResponse).get("token").asText();
         assertThat(token).isNotBlank();
 
