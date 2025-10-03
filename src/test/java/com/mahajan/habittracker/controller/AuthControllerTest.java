@@ -8,6 +8,7 @@ import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.service.UserService;
 import com.mahajan.habittracker.util.JwtUtil;
 import jakarta.transaction.Transactional;
+import lombok.extern.java.Log;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -58,9 +59,8 @@ class AuthControllerTest {
         @Test
         @DisplayName("should register new user")
         void signupSuccess() throws Exception {
-            SignupRequest request = new SignupRequest();
-            request.setEmail("alice@example.com");
-            request.setPassword("password123");
+            SignupRequest request = SignupRequest.builder()
+                    .email("alice@example.com").password("password123").build();
 
             Mockito.when(userService.existsByEmail("alice@example.com")).thenReturn(false);
             Mockito.when(userService.createUser(any(User.class))).thenReturn(new User());
@@ -75,9 +75,7 @@ class AuthControllerTest {
         @Test
         @DisplayName("should fail if email already exists")
         void signupDuplicateEmail() throws Exception {
-            SignupRequest request = new SignupRequest();
-            request.setEmail("bob@example.com");
-            request.setPassword("password123");
+            SignupRequest request = SignupRequest.builder().email("bob@example.com").password("password123").build();
 
             Mockito.when(userService.existsByEmail("bob@example.com")).thenReturn(true);
 
@@ -96,9 +94,8 @@ class AuthControllerTest {
         @Test
         @DisplayName("should return JWT token when credentials are valid")
         void loginSuccess() throws Exception {
-            LoginRequest request = new LoginRequest();
-            request.setEmail("charlie@example.com");
-            request.setPassword("password123");
+            LoginRequest request = LoginRequest.builder()
+                    .email("charlie@example.com").password("password123").build();
 
             // Return a dummy Authentication object
             Authentication mockAuth = Mockito.mock(Authentication.class);
@@ -115,9 +112,8 @@ class AuthControllerTest {
         @Test
         @DisplayName("should return 401 when credentials are invalid")
         void loginFailure() throws Exception {
-            LoginRequest request = new LoginRequest();
-            request.setEmail("dave@example.com");
-            request.setPassword("wrongpassword");
+            LoginRequest request = LoginRequest.builder()
+                    .email("dave@example.com").password("wrongpassword").build();
 
             Mockito.doThrow(new BadCredentialsException("Invalid email or password"))
                     .when(authenticationManager).authenticate(any());

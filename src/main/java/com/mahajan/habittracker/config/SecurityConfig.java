@@ -1,5 +1,7 @@
 package com.mahajan.habittracker.config;
 
+import com.mahajan.habittracker.security.JwtAuthFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,9 +12,13 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
 
     /**
      * Defines the PasswordEncoder bean used across the application.
@@ -45,8 +51,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()   // signup/login are public
                         .anyRequest().authenticated()                    // everything else requires auth
                 )
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll) // enable form login
-                .httpBasic(basic -> {});             // enable HTTP Basic auth (useful for testing)
+                // disable default login mechanisms, since you're using JWT
+                .formLogin(AbstractAuthenticationFilterConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                // register your custom JWT filter
+                    .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

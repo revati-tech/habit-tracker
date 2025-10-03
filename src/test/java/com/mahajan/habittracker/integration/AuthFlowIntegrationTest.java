@@ -34,10 +34,8 @@ class AuthFlowIntegrationTest {
     @DisplayName("Signup → Login → Access protected endpoint with JWT")
     void fullAuthFlow() throws Exception {
         // 1. Signup a new user (using DTO, not entity)
-        SignupRequest signupRequest = new SignupRequest();
-        signupRequest.setEmail("alice@example.com");
-        signupRequest.setPassword("password123");
-
+        SignupRequest signupRequest =  SignupRequest.builder()
+                .email("alice@example.com").password("password123").build();
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupRequest)))
@@ -47,9 +45,8 @@ class AuthFlowIntegrationTest {
         assertThat(userRepository.findByEmail("alice@example.com")).isPresent();
 
         // 2. Login with correct credentials
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setEmail("alice@example.com");
-        loginRequest.setPassword("password123");
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("alice@example.com").password("password123").build();
 
         String loginResponse = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -63,12 +60,63 @@ class AuthFlowIntegrationTest {
         assertThat(token).isNotBlank();
 
         // 3. Access protected endpoint with token
-       /* mockMvc.perform(get("/api/habits")
+       mockMvc.perform(get("/api/habits")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk()); // assumes /api/habits exists and is secured
 
         // 4. Access protected endpoint without token should fail
         mockMvc.perform(get("/api/habits"))
-                .andExpect(status().isUnauthorized());*/
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Login with wrong password should return 401")
+    void loginWithWrongPassword() throws Exception {
+        signup("bob@example.com", "strongPass");
+
+        LoginRequest loginRequest = LoginRequest.builder()
+                .email("bob@example.com").password("wrongPass").build();
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized());
+              //  .andExpect(jsonPath("$.status").value(401))
+               // .andExpect(jsonPath("$.error").value("Unauthorized"));
+    }
+
+    @Test
+    @DisplayName("Signup with duplicate email should return 409")
+    void signupDuplicateEmail() throws Exception {
+        signup("alice@example.com", "password123");
+
+        SignupRequest duplicate = SignupRequest.builder()
+                .email("alice@example.com").password("password123").build();
+        mockMvc.perform(post("/api/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(duplicate)))
+                .andExpect(status().isBadRequest());
+               // .andExpect(jsonPath("$.status").value(400))
+               // .andExpect(jsonPath("$.error").value("Conflict"));
+    }
+
+    @Test
+    @DisplayName("Access protected endpoint with malformed JWT should return 401")
+    void accessWithMalformedJwt() throws Exception {
+        mockMvc.perform(get("/api/habits")
+                        .header("Authorization", "Bearer not_a_jwt"))
+                .andExpect(status().isForbidden());
+               // .andExpect(jsonPath("$.status").value(401))
+               // .andExpect(jsonPath("$.error").value("Unauthorized"));
+    }
+
+    private void signup(String email, String password) throws Exception {
+        SignupRequest signupRequest = SignupRequest.builder()
+                .email(email).password(password).build();
+
+        mockMvc.perform(post("/api/auth/signup")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(signupRequest)))
+                .andExpect(status().isOk())   // or .isCreated() depending on your controller
+                .andExpect(content().string("User registered successfully"));
     }
 }
