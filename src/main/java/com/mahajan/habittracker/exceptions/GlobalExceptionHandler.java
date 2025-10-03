@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.net.BindException;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,15 +20,15 @@ import java.util.Map;
 @Slf4j
 public class GlobalExceptionHandler {
     @ExceptionHandler(HabitNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleHabitNotFoundException(HabitNotFoundException e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleHabitNotFoundException(HabitNotFoundException e, HttpServletRequest request) {
         log.error("Habit not found: {}", e.getMessage(), e); // logs stack
-        return buildErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request.getRequestURI());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(UserNotFoundException e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException e, HttpServletRequest request) {
         log.error("User not found: {}", e.getMessage(), e); // logs stack
-        return buildErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request.getRequestURI());
+        return buildErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request);
     }
 
     // ------------------ 400 Bad Request ------------------
@@ -38,38 +38,32 @@ public class GlobalExceptionHandler {
             BindException.class,                    // form binding errors
             MissingServletRequestParameterException.class
     })
-    public ResponseEntity<Map<String, Object>> handleBadRequest(Exception e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleBadRequest(Exception e, HttpServletRequest request) {
         log.error("Bad Request", e);
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request.getRequestURI());
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<Map<String, String>> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", ex.getMessage());
-        return ResponseEntity.badRequest().body(errorResponse);
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(EmailAlreadyExistsException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleBadCredentials(BadCredentialsException ex) {
-        Map<String, String> errorResponse = new HashMap<>();
-        errorResponse.put("error", ex.getMessage());
-        return ResponseEntity.status(401).body(errorResponse);
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
     }
 
     @ExceptionHandler(Exception.class) // fallback for anything else
-    public ResponseEntity<Map<String, Object>> handleGeneric(Exception e, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception e, HttpServletRequest request) {
         log.error("Unexpected error occurred", e);
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), request.getRequestURI());
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage(), request);
     }
 
-    private ResponseEntity<Map<String, Object>> buildErrorResponse(HttpStatus status, String message, String path) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        body.put("path", path);
-        return new ResponseEntity<>(body, status);
+    private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message, HttpServletRequest request) {
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .status(status.value())
+                .error(status.getReasonPhrase())
+                .message(message).path(request.getRequestURI()).timestamp(Instant.now()).build();
+        return ResponseEntity.status(status).body(errorResponse);
     }
 }

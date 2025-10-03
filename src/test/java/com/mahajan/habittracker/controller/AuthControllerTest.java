@@ -83,7 +83,7 @@ class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.error").value("Email already in use: bob@example.com"));
+                    .andExpect(jsonPath("$.message").value("Email already in use: bob@example.com"));
         }
     }
 
@@ -122,7 +122,7 @@ class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.error").value("Invalid email or password"));
+                    .andExpect(jsonPath("$.message").value("Invalid email or password"));
         }
     }
 }
