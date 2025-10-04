@@ -66,7 +66,7 @@ class AuthFlowIntegrationTest {
 
         // 4. Access protected endpoint without token should fail
         mockMvc.perform(get("/api/habits"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -79,9 +79,9 @@ class AuthFlowIntegrationTest {
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isUnauthorized());
-              //  .andExpect(jsonPath("$.status").value(401))
-               // .andExpect(jsonPath("$.error").value("Unauthorized"));
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"));
     }
 
     @Test
@@ -94,9 +94,9 @@ class AuthFlowIntegrationTest {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(duplicate)))
-                .andExpect(status().isBadRequest());
-               // .andExpect(jsonPath("$.status").value(400))
-               // .andExpect(jsonPath("$.error").value("Conflict"));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error").value("Conflict"));
     }
 
     @Test
@@ -104,9 +104,9 @@ class AuthFlowIntegrationTest {
     void accessWithMalformedJwt() throws Exception {
         mockMvc.perform(get("/api/habits")
                         .header("Authorization", "Bearer not_a_jwt"))
-                .andExpect(status().isForbidden());
-               // .andExpect(jsonPath("$.status").value(401))
-               // .andExpect(jsonPath("$.error").value("Unauthorized"));
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.error").value("Unauthorized"));
     }
 
     private void signup(String email, String password) throws Exception {
@@ -116,7 +116,7 @@ class AuthFlowIntegrationTest {
         mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupRequest)))
-                .andExpect(status().isOk())   // or .isCreated() depending on your controller
+                .andExpect(status().isOk())
                 .andExpect(content().string("User registered successfully"));
     }
 }

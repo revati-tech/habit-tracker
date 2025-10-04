@@ -1,9 +1,15 @@
 package com.mahajan.habittracker.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mahajan.habittracker.exceptions.ErrorResponse;
+import com.mahajan.habittracker.exceptions.GlobalExceptionHandler;
 import com.mahajan.habittracker.security.JwtAuthFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,11 +20,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
+
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final GlobalExceptionHandler exceptionHandler;
+    private final ObjectMapper objectMapper;
 
     /**
      * Defines the PasswordEncoder bean used across the application.
@@ -51,11 +61,32 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()   // signup/login are public
                         .anyRequest().authenticated()                    // everything else requires auth
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // delegate to GlobalExceptionHandler
+                            ResponseEntity<ErrorResponse> entity =
+                                    exceptionHandler.buildResponse(HttpStatus.UNAUTHORIZED, "Unauthorized", request);
+                            writeResponse(response, entity);
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            ResponseEntity<ErrorResponse> entity =
+                                    exceptionHandler.buildResponse(HttpStatus.FORBIDDEN, "Forbidden", request);
+                            writeResponse(response, entity);
+                        })
+                )
                 // disable default login mechanisms, since you're using JWT
                 .formLogin(AbstractAuthenticationFilterConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // register your custom JWT filter
                     .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+
+    }
+
+    private void writeResponse(HttpServletResponse response,
+                               ResponseEntity<ErrorResponse> entity) throws IOException {
+        response.setStatus(entity.getStatusCode().value());
+        response.setContentType("application/json");
+        objectMapper.writeValue(response.getWriter(), entity.getBody());
     }
 }
