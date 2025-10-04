@@ -17,10 +17,10 @@ public class HabitRequest {
     private String description;
 
     // Convert this DTO into a Habit entity
-    public static Habit toEntity(HabitRequest habitRequest) {
+    public Habit toEntity() {
         return Habit.builder()
-                .name(habitRequest.name)
-                .description(habitRequest.description)
+                .name(this.name)
+                .description(this.description)
                 .build();
     }
 }

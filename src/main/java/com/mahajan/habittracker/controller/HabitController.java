@@ -34,7 +34,7 @@ public class HabitController {
 
     @PostMapping
     public ResponseEntity<HabitResponse> createHabit(@Valid @RequestBody() HabitRequest habitRequest) {
-        Habit habit = HabitRequest.toEntity(habitRequest);
+        Habit habit = habitRequest.toEntity();
         Habit createdHabit = habitService.createHabitForUser(habit, getCurrentUser());
         URI location = URI.create("/api/habits/" + createdHabit.getId());
         return ResponseEntity.created(location).body(HabitResponse.fromEntity(createdHabit));
@@ -54,7 +54,7 @@ public class HabitController {
 
     @PutMapping("/{habitId}")
     public ResponseEntity<HabitResponse> updateHabit(@PathVariable Long habitId, @Valid @RequestBody() HabitRequest habitRequest) {
-        Habit habit = HabitRequest.toEntity(habitRequest);
+        Habit habit = habitRequest.toEntity();
         habit.setId(habitId);
         Habit updated = habitService.updateHabitForUser(habit, getCurrentUser());
         return ResponseEntity.ok(HabitResponse.fromEntity(updated));
