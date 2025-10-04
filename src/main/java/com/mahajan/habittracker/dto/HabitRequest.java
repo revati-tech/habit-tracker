@@ -1,5 +1,6 @@
 package com.mahajan.habittracker.dto;
 
+import com.mahajan.habittracker.model.Habit;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
@@ -14,4 +15,12 @@ public class HabitRequest {
 
     @Size(max = 255, message = "Description must be at most 255 characters")
     private String description;
+
+    // Convert this DTO into a Habit entity
+    public static Habit toEntity(HabitRequest habitRequest) {
+        return Habit.builder()
+                .name(habitRequest.name)
+                .description(habitRequest.description)
+                .build();
+    }
 }

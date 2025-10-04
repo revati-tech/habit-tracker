@@ -24,18 +24,18 @@ public class HabitController {
     private final UserService userService;
 
     @GetMapping
-    public List<HabitResponse> getAllHabits() {
-        return habitService.getHabitsForUser(getCurrentUser())
+    public ResponseEntity<List<HabitResponse>> getHabits() {
+        List<HabitResponse> habits = habitService.getHabitsForUser(getCurrentUser())
                 .stream().map(HabitResponse::fromEntity)
                 .toList();
+        return ResponseEntity.ok(habits);
     }
 
     @PostMapping
-    public HabitResponse createHabit(@Valid @RequestBody() HabitRequest habitRequest) {
-        Habit habit = Habit.builder().name(habitRequest
-                .getName()).description(habitRequest.getDescription()).build();
+    public ResponseEntity<HabitResponse> createHabit(@Valid @RequestBody() HabitRequest habitRequest) {
+        Habit habit = HabitRequest.toEntity(habitRequest);
         habitService.createHabitForUser(habit, getCurrentUser());
-        return HabitResponse.fromEntity(habit);
+        return ResponseEntity.ok(HabitResponse.fromEntity(habit));
     }
 
     @DeleteMapping("/{habitId}")
@@ -45,17 +45,16 @@ public class HabitController {
     }
 
     @GetMapping("/{habitId}")
-    public HabitResponse getHabitById(@PathVariable Long habitId) {
+    public ResponseEntity<HabitResponse> getHabit(@PathVariable Long habitId) {
         Habit habit = habitService.getHabitByIdForUser(habitId, getCurrentUser());
-        return HabitResponse.fromEntity(habit);
+        return ResponseEntity.ok(HabitResponse.fromEntity(habit));
     }
 
     @PutMapping("/{habitId}")
-    public HabitResponse updateHabit(@PathVariable Long habitId, @Valid @RequestBody() HabitRequest habitRequest) {
-        Habit habit = Habit.builder().id(habitId).name(habitRequest.getName())
-                .description(habitRequest.getDescription()).build();
+    public ResponseEntity<HabitResponse> updateHabit(@PathVariable Long habitId, @Valid @RequestBody() HabitRequest habitRequest) {
+        Habit habit = HabitRequest.toEntity(habitRequest);
         Habit updated = habitService.updateHabitForUser(habit, getCurrentUser());
-        return HabitResponse.fromEntity(updated);
+        return ResponseEntity.ok(HabitResponse.fromEntity(updated));
     }
 
     private User getCurrentUser() {
