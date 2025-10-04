@@ -82,7 +82,7 @@ class AuthControllerTest {
             mockMvc.perform(post("/api/auth/signup")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
-                    .andExpect(status().isBadRequest())
+                    .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.message").value("Email already in use: bob@example.com"));
         }
     }
