@@ -24,10 +24,10 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(controllers = HabitController.class,
@@ -72,10 +72,11 @@ class HabitControllerSuccessTest {
                 .name(testHabit.getName())
                 .description(testHabit.getDescription())
                 .build();
+        when(habitService.createHabitForUser(any(Habit.class), eq(testUser))).thenReturn(testHabit);
         String response = mockMvc.perform(post(BASE_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
        return objectMapper.readValue(response, Habit.class);
@@ -87,11 +88,12 @@ class HabitControllerSuccessTest {
                 .name(testHabit.getName())
                 .description(testHabit.getDescription())
                 .build();
-        when(habitService.createHabitForUser(testHabit, testUser)).thenReturn(testHabit);
+        when(habitService.createHabitForUser(any(Habit.class), eq(testUser))).thenReturn(testHabit);
      mockMvc.perform(post(BASE_URL).contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/api/habits/100"))
                 .andExpect(jsonPath("$.name").value("Exercise"))
                 .andExpect(jsonPath("$.description").value("Daily workout"));
     }

@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -34,8 +35,9 @@ public class HabitController {
     @PostMapping
     public ResponseEntity<HabitResponse> createHabit(@Valid @RequestBody() HabitRequest habitRequest) {
         Habit habit = HabitRequest.toEntity(habitRequest);
-        habitService.createHabitForUser(habit, getCurrentUser());
-        return ResponseEntity.ok(HabitResponse.fromEntity(habit));
+        Habit createdHabit = habitService.createHabitForUser(habit, getCurrentUser());
+        URI location = URI.create("/api/habits/" + createdHabit.getId());
+        return ResponseEntity.created(location).body(HabitResponse.fromEntity(createdHabit));
     }
 
     @DeleteMapping("/{habitId}")
@@ -53,6 +55,7 @@ public class HabitController {
     @PutMapping("/{habitId}")
     public ResponseEntity<HabitResponse> updateHabit(@PathVariable Long habitId, @Valid @RequestBody() HabitRequest habitRequest) {
         Habit habit = HabitRequest.toEntity(habitRequest);
+        habit.setId(habitId);
         Habit updated = habitService.updateHabitForUser(habit, getCurrentUser());
         return ResponseEntity.ok(HabitResponse.fromEntity(updated));
     }
