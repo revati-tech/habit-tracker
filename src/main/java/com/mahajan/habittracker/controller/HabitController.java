@@ -9,8 +9,7 @@ import com.mahajan.habittracker.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -25,44 +24,52 @@ public class HabitController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<HabitResponse>> getHabits() {
-        List<HabitResponse> habits = habitService.getHabitsForUser(getCurrentUser())
+    public ResponseEntity<List<HabitResponse>> getHabits(
+            @AuthenticationPrincipal(expression = "username") String email) {
+        User user = userService.getUserByEmail(email);
+        List<HabitResponse> habits = habitService.getHabitsForUser(user)
                 .stream().map(HabitResponse::fromEntity)
                 .toList();
         return ResponseEntity.ok(habits);
     }
 
     @PostMapping
-    public ResponseEntity<HabitResponse> createHabit(@Valid @RequestBody() HabitRequest habitRequest) {
+    public ResponseEntity<HabitResponse> createHabit(
+            @Valid @RequestBody() HabitRequest habitRequest,
+            @AuthenticationPrincipal(expression = "username") String email) {
         Habit habit = habitRequest.toEntity();
-        Habit createdHabit = habitService.createHabitForUser(habit, getCurrentUser());
+        User user = userService.getUserByEmail(email);
+        Habit createdHabit = habitService.createHabitForUser(habit, user);
         URI location = URI.create("/api/habits/" + createdHabit.getId());
         return ResponseEntity.created(location).body(HabitResponse.fromEntity(createdHabit));
     }
 
     @DeleteMapping("/{habitId}")
-    public ResponseEntity<Void> deleteHabit(@PathVariable Long habitId) {
-        habitService.deleteHabitForUser(habitId, getCurrentUser());
+    public ResponseEntity<Void> deleteHabit(@PathVariable Long habitId,
+                                            @AuthenticationPrincipal(expression = "username") String email) {
+        User user = userService.getUserByEmail(email);
+        habitService.deleteHabitForUser(habitId, user);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{habitId}")
-    public ResponseEntity<HabitResponse> getHabit(@PathVariable Long habitId) {
-        Habit habit = habitService.getHabitByIdForUser(habitId, getCurrentUser());
+    public ResponseEntity<HabitResponse> getHabit(
+            @PathVariable Long habitId,
+            @AuthenticationPrincipal(expression = "username") String email) {
+        User user = userService.getUserByEmail(email);
+        Habit habit = habitService.getHabitByIdForUser(habitId, user);
         return ResponseEntity.ok(HabitResponse.fromEntity(habit));
     }
 
     @PutMapping("/{habitId}")
-    public ResponseEntity<HabitResponse> updateHabit(@PathVariable Long habitId, @Valid @RequestBody() HabitRequest habitRequest) {
+    public ResponseEntity<HabitResponse> updateHabit(
+            @PathVariable Long habitId,
+            @Valid @RequestBody() HabitRequest habitRequest,
+            @AuthenticationPrincipal(expression = "username") String email) {
         Habit habit = habitRequest.toEntity();
         habit.setId(habitId);
-        Habit updated = habitService.updateHabitForUser(habit, getCurrentUser());
+        User user = userService.getUserByEmail(email);
+        Habit updated = habitService.updateHabitForUser(habit, user);
         return ResponseEntity.ok(HabitResponse.fromEntity(updated));
-    }
-
-    private User getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        return userService.getUserByEmail(email);
     }
 }

@@ -18,8 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -65,13 +64,12 @@ class HabitControllerExceptionTest {
 
         // Set up a fake authenticated user
         testUser = User.builder().id(TEST_USER_ID).email("test@example.com").build();
-        SecurityContextHolder.getContext()
-                .setAuthentication(new TestingAuthenticationToken(testUser.getEmail(), null));
 
         when(userService.getUserByEmail("test@example.com")).thenReturn(testUser);
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testGetHabitByIdHabitNotFound() throws Exception {
         when(habitService.getHabitByIdForUser(anyLong(), any(User.class)))
                 .thenThrow(new HabitNotFoundException(TEST_HABIT_ID, testUser.getEmail()));
@@ -82,6 +80,7 @@ class HabitControllerExceptionTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testDeleteHabitNotFound() throws Exception {
         doThrow(new HabitNotFoundException(TEST_HABIT_ID, testUser.getEmail()))
                 .when(habitService).deleteHabitForUser(anyLong(), any(User.class));
@@ -92,6 +91,7 @@ class HabitControllerExceptionTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testUpdateHabitMissingBody() throws Exception {
         // No need to stub service, request will fail before service is called
         mockMvc.perform(put(BASE_URL_WITH_ID, TEST_HABIT_ID)
@@ -101,6 +101,7 @@ class HabitControllerExceptionTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testUpdateHabitNotFound() throws Exception {
         when(habitService.updateHabitForUser(any(Habit.class), any(User.class)))
                 .thenThrow(new HabitNotFoundException(TEST_HABIT_ID, testUser.getEmail()));
@@ -114,6 +115,7 @@ class HabitControllerExceptionTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testGetHabitByIdUserNotFound() throws Exception {
         when(userService.getUserByEmail(any(String.class)))
                 .thenThrow(new UserNotFoundException(TEST_USER_ID));
@@ -132,6 +134,7 @@ class HabitControllerExceptionTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testCreateUserNotFound() throws Exception {
         HabitRequest request = HabitRequest.builder()
                 .name(testHabit.getName())

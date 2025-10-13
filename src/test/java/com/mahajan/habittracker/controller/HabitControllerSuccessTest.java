@@ -18,13 +18,13 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -61,8 +61,6 @@ class HabitControllerSuccessTest {
 
         // Set up a fake authenticated user
         testUser = User.builder().id(1L).email("test@example.com").build();
-        SecurityContextHolder.getContext()
-                .setAuthentication(new TestingAuthenticationToken(testUser.getEmail(), null));
 
         when(userService.getUserByEmail("test@example.com")).thenReturn(testUser);
     }
@@ -83,6 +81,7 @@ class HabitControllerSuccessTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testCreateHabit() throws Exception {
         HabitRequest request = HabitRequest.builder()
                 .name(testHabit.getName())
@@ -99,6 +98,7 @@ class HabitControllerSuccessTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testGetAllHabits() throws Exception {
 
         Habit habit2 = Habit.builder().name("Meditation").description("Daily meditation").build();
@@ -116,6 +116,7 @@ class HabitControllerSuccessTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testGetHabitById() throws Exception {
         when(habitService.getHabitByIdForUser(any(Long.class), any(User.class))).thenReturn(testHabit);
         mockMvc.perform(get(BASE_URL_WITH_ID, 100L))
@@ -125,6 +126,7 @@ class HabitControllerSuccessTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testDeleteHabit() throws Exception {
         Habit savedHabit = addHabitAndReturn();
         mockMvc.perform(delete(BASE_URL_WITH_ID, 100L))
@@ -135,6 +137,7 @@ class HabitControllerSuccessTest {
     }
 
     @Test
+    @WithMockUser(username = "test@example.com")
     void testUpdateHabit() throws Exception {
         HabitRequest habitRequest = HabitRequest.builder().name("Updated Name").description("Updated Description").build();
         when(habitService.updateHabitForUser(any(Habit.class), any(User.class)))
