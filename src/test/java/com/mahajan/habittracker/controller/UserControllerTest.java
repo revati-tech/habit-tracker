@@ -1,117 +1,76 @@
 package com.mahajan.habittracker.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mahajan.habittracker.config.SecurityTestConfig;
-import com.mahajan.habittracker.dto.UserRequest;
+import com.mahajan.habittracker.config.SecurityConfig;
+import com.mahajan.habittracker.exceptions.UserNotFoundException;
 import com.mahajan.habittracker.model.User;
-import com.mahajan.habittracker.repository.UserRepository;
-import jakarta.transaction.Transactional;
+import com.mahajan.habittracker.security.JwtAuthFilter;
+import com.mahajan.habittracker.service.UserService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
-@ActiveProfiles("test")
-@Import(SecurityTestConfig.class)
+/**
+ * Tests for {@link UserController}.
+ */
+@WebMvcTest(controllers = UserController.class,
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = JwtAuthFilter.class))
+@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest {
-    private static final String EMAIL = "test@test.com";
-
-    private static final String PASSWORD = "password123";
-
-    private static final String BASE_URL = "/api/users/{userId}";
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    @MockBean
+    private UserService userService;
 
     @Test
-    void testCreateUser() throws Exception {
-        UserRequest request = UserRequest.builder()
-                .email(EMAIL).password(PASSWORD).build();
+    @DisplayName("GET /api/users/me should return the authenticated user's details")
+    @WithMockUser(username = "test@example.com")
+    void testCurrentUser() throws Exception {
+        // Arrange
+        User mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setEmail("test@example.com");
 
-        ResultActions result = mockMvc.perform(post("/api/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+        Mockito.when(userService.getUserByEmail("test@example.com"))
+                .thenReturn(mockUser);
 
-        result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value(EMAIL));
-        // Fetch saved user from repository
-        User savedUser = userRepository.findByEmail(EMAIL)
-                .orElseThrow(() -> new AssertionError("User not found in DB"));
-
-        // Assert password was encoded properly
-        String encodedPassword = savedUser.getPassword();
-        assertNotEquals(PASSWORD, encodedPassword); // make sure it's not plain text
-        assertTrue(passwordEncoder.matches(PASSWORD, encodedPassword)); // ver
-
-    }
-
-    @Test
-    void getAllUsers() throws Exception {
-        User user1 = addUserAndReturn();
-        UserRequest request2 = UserRequest.builder().email("second@test.com").password(PASSWORD).build();
-        ResultActions result2 = mockMvc.perform(post("/api/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request2)));
-        User user2 = objectMapper.readValue(result2.andReturn().getResponse().getContentAsString(), User.class);
-
-        ResultActions result = mockMvc.perform(get("/api/users"));
-
-        result.andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[?(@.id==" + user1.getId() + ")].email").value(EMAIL))
-                .andExpect(jsonPath("$[?(@.id==" + user2.getId() + ")].email").value("second@test.com"));
-    }
-
-
-    @Test
-    void testGetUserById() throws Exception {
-        User user = addUserAndReturn();
-        ResultActions result = mockMvc.perform(get(BASE_URL, user.getId()));
-        assertUserResponse(result, user);
-    }
-
-    private User addUserAndReturn() throws Exception {
-        UserRequest request = UserRequest.builder().email(EMAIL).password(PASSWORD).build();
-
-        ResultActions result = mockMvc.perform(post("/api/users")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
-
-        return objectMapper.readValue(result.andReturn().getResponse().getContentAsString(), User.class);
-    }
-
-    private void assertUserResponse(org.springframework.test.web.servlet.ResultActions resultActions, User user) throws Exception {
-        resultActions
+        // Act & Assert
+        mockMvc.perform(get("/api/users/me")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(user.getId()))
-                .andExpect(jsonPath("$.email").value(EMAIL))
-                .andExpect(jsonPath("$.password").doesNotExist()); // ✅ password should not be in response
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.email", is("test@example.com")));
 
+        Mockito.verify(userService).getUserByEmail("test@example.com");
+    }
+
+    // ❌ Negative Case 1: User Not Found
+    @Test
+    @DisplayName("GET /api/users/me returns 404 when user not found")
+    @WithMockUser(username = "missing@example.com")
+    void testCurrentUserNotFound() throws Exception {
+        Mockito.when(userService.getUserByEmail("missing@example.com"))
+                .thenThrow(new UserNotFoundException("User not found"));
+
+        mockMvc.perform(get("/api/users/me")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        Mockito.verify(userService).getUserByEmail("missing@example.com");
     }
 }
