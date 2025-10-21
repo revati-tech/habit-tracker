@@ -51,6 +51,13 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex.getMessage(), request);
     }
 
+    @ExceptionHandler(HabitAlreadyCompletedException.class)
+    public ResponseEntity<ErrorResponse> handleHabitAlreadyCompleted(HabitAlreadyCompletedException e, HttpServletRequest request) {
+        log.warn("Habit already completed: {}", e.getMessage());
+        return buildResponse(HttpStatus.CONFLICT, e.getMessage(), request);
+    }
+
+
     @ExceptionHandler(Exception.class) // fallback for anything else
     public ResponseEntity<ErrorResponse> handleGeneric(Exception e, HttpServletRequest request) {
         log.error("Unexpected error occurred", e);
