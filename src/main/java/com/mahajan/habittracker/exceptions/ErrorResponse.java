@@ -1,6 +1,5 @@
 package com.mahajan.habittracker.exceptions;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import java.time.Instant;

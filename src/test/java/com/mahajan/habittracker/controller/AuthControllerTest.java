@@ -8,7 +8,6 @@ import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.service.UserService;
 import com.mahajan.habittracker.util.JwtUtil;
 import jakarta.transaction.Transactional;
-import lombok.extern.java.Log;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

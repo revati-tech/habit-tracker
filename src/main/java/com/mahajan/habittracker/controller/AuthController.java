@@ -1,8 +1,8 @@
 package com.mahajan.habittracker.controller;
 
+import com.mahajan.habittracker.dto.AuthResponse;
 import com.mahajan.habittracker.dto.LoginRequest;
 import com.mahajan.habittracker.dto.SignupRequest;
-import com.mahajan.habittracker.dto.AuthResponse;
 import com.mahajan.habittracker.exceptions.EmailAlreadyExistsException;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.service.UserService;
@@ -12,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -1,12 +1,16 @@
 package com.mahajan.habittracker.controller;
 
-import com.mahajan.habittracker.dto.UserResponse;;
+import com.mahajan.habittracker.dto.UserResponse;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+;
 
 
 @RestController
