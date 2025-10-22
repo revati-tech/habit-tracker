@@ -1,6 +1,7 @@
 package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitAlreadyCompletedException;
+import com.mahajan.habittracker.exceptions.HabitCompletionNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.HabitCompletion;
 import com.mahajan.habittracker.model.User;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -105,6 +107,37 @@ class HabitCompletionServiceTest {
                 .findAllByHabitAndUserOrderByCompletionDateDesc(habit, user);
     }
 
+    @Test
+    void testUnmarkCompletedSuccess() {
+        HabitCompletion completion = HabitCompletion.builder()
+                .id(1L)
+                .habit(habit)
+                .user(user)
+                .completionDate(TODAY)
+                .build();
+
+        when(completionRepository.findByHabitAndUserAndCompletionDate(habit, user, TODAY))
+                .thenReturn(Optional.of(completion));
+
+        completionService.unmarkCompleted(habit, user, TODAY);
+
+        verify(completionRepository, times(1))
+                .findByHabitAndUserAndCompletionDate(habit, user, TODAY);
+        verify(completionRepository, times(1)).delete(completion);
+    }
+
+    @Test
+    void testUnmarkCompletedNotFound() {
+        when(completionRepository.findByHabitAndUserAndCompletionDate(habit, user, TODAY))
+                .thenReturn(Optional.empty());
+
+        assertHabitCompletionNotFound(() -> completionService.unmarkCompleted(habit, user, TODAY));
+
+        verify(completionRepository, times(1))
+                .findByHabitAndUserAndCompletionDate(habit, user, TODAY);
+        verify(completionRepository, never()).delete(any(HabitCompletion.class));
+    }
+
     // ------------------------------------------------------------
     // Helper assertions
     // ------------------------------------------------------------
@@ -114,6 +147,12 @@ class HabitCompletionServiceTest {
                 assertThrows(HabitAlreadyCompletedException.class, executable);
 
         assertTrue(exception.getMessage().contains("already completed"));
+    }
+
+    private void assertHabitCompletionNotFound(Executable executable) {
+        HabitCompletionNotFoundException exception =
+                assertThrows(HabitCompletionNotFoundException.class, executable);
+        assertTrue(exception.getMessage().contains("No completion found"));
     }
 
     private void assertCompletionEquals(HabitCompletion expected, HabitCompletion actual) {

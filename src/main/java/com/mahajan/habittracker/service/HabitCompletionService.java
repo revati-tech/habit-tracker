@@ -1,6 +1,7 @@
 package com.mahajan.habittracker.service;
 
 import com.mahajan.habittracker.exceptions.HabitAlreadyCompletedException;
+import com.mahajan.habittracker.exceptions.HabitCompletionNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.HabitCompletion;
 import com.mahajan.habittracker.model.User;
@@ -31,6 +32,15 @@ public class HabitCompletionService {
                 .build();
 
         return completionRepository.save(completion);
+    }
+
+    @Transactional
+    public void unmarkCompleted(Habit habit, User user, LocalDate date) {
+        HabitCompletion completion = completionRepository
+                .findByHabitAndUserAndCompletionDate(habit, user, date)
+                .orElseThrow(() -> new HabitCompletionNotFoundException(habit.getId(), date.toString()));
+
+        completionRepository.delete(completion);
     }
 
     public List<HabitCompletion> getCompletions(Habit habit, User user) {

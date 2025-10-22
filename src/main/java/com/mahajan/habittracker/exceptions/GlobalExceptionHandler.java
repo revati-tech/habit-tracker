@@ -57,6 +57,12 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.CONFLICT, e.getMessage(), request);
     }
 
+    @ExceptionHandler(HabitCompletionNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleHabitCompletionNotFound(HabitCompletionNotFoundException e, HttpServletRequest request) {
+        log.warn("Habit completion not found: {}", e.getMessage());
+        return buildResponse(HttpStatus.NOT_FOUND, e.getMessage(), request);
+    }
+
 
     @ExceptionHandler(Exception.class) // fallback for anything else
     public ResponseEntity<ErrorResponse> handleGeneric(Exception e, HttpServletRequest request) {

@@ -1,7 +1,7 @@
 package com.mahajan.habittracker.controller;
 
-import com.mahajan.habittracker.dto.HabitCompletionResponse;
 import com.mahajan.habittracker.exceptions.HabitAlreadyCompletedException;
+import com.mahajan.habittracker.exceptions.HabitCompletionNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.security.JwtAuthFilter;
@@ -26,8 +26,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -116,5 +115,48 @@ class HabitCompletionControllerTest {
 
         Mockito.verify(userService).getUserByEmail(USER_EMAIL);
         Mockito.verify(habitService).getHabitByIdForUser(HABIT_ID, mockUser);
+    }
+
+    // ✅ Positive Case: Unmark completion (delete)
+    @Test
+    @DisplayName("DELETE /api/habits/{habitId}/completions/{date} should delete completion and return 204 No Content")
+    @WithMockUser(username = USER_EMAIL)
+    void testUnmarkCompletedSuccess() throws Exception {
+        User mockUser = User.builder().id(1L).email(USER_EMAIL).build();
+        Habit mockHabit = Habit.builder().id(HABIT_ID).name("Exercise").build();
+        String date = "2025-10-21";
+
+        Mockito.when(userService.getUserByEmail(USER_EMAIL)).thenReturn(mockUser);
+        Mockito.when(habitService.getHabitByIdForUser(HABIT_ID, mockUser)).thenReturn(mockHabit);
+
+        mockMvc.perform(delete("/api/habits/{habitId}/completions/{date}", HABIT_ID, date)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        Mockito.verify(completionService)
+                .unmarkCompleted(eq(mockHabit), eq(mockUser), eq(LocalDate.parse(date)));
+    }
+
+    // ❌ Negative Case: Unmark completion not found
+    @Test
+    @DisplayName("DELETE /api/habits/{habitId}/completions/{date} returns 404 when completion not found")
+    @WithMockUser(username = USER_EMAIL)
+    void testUnmarkCompletedNotFound() throws Exception {
+        User mockUser = User.builder().id(1L).email(USER_EMAIL).build();
+        Habit mockHabit = Habit.builder().id(HABIT_ID).name("Exercise").build();
+        String date = "2025-10-21";
+
+        Mockito.when(userService.getUserByEmail(USER_EMAIL)).thenReturn(mockUser);
+        Mockito.when(habitService.getHabitByIdForUser(HABIT_ID, mockUser)).thenReturn(mockHabit);
+        Mockito.doThrow(new HabitCompletionNotFoundException(HABIT_ID, date))
+                .when(completionService)
+                .unmarkCompleted(eq(mockHabit), eq(mockUser), eq(LocalDate.parse(date)));
+
+        mockMvc.perform(delete("/api/habits/{habitId}/completions/{date}", HABIT_ID, date)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        Mockito.verify(completionService)
+                .unmarkCompleted(eq(mockHabit), eq(mockUser), eq(LocalDate.parse(date)));
     }
 }

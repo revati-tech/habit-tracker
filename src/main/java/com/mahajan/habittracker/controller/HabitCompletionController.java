@@ -44,6 +44,23 @@ public class HabitCompletionController {
     }
 
     /**
+     * Unmarks a habit as completed for the given date
+     */
+    @DeleteMapping("/{date}")
+    public ResponseEntity<Void> unmarkCompleted(
+            @PathVariable Long habitId,
+            @PathVariable String date,
+            @AuthenticationPrincipal(expression = "username") String email) {
+
+        User currentUser = userService.getUserByEmail(email);
+        Habit habit = habitService.getHabitByIdForUser(habitId, currentUser);
+
+        completionService.unmarkCompleted(habit, currentUser, LocalDate.parse(date));
+
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
+
+    /**
      * Returns all completion dates for the given habit and authenticated user.
      */
     @GetMapping
@@ -61,5 +78,4 @@ public class HabitCompletionController {
 
         return ResponseEntity.ok(responses);
     }
-
 }
