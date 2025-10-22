@@ -3,6 +3,8 @@ package com.mahajan.habittracker.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mahajan.habittracker.dto.LoginRequest;
 import com.mahajan.habittracker.dto.SignupRequest;
+import com.mahajan.habittracker.repository.HabitCompletionRepository;
+import com.mahajan.habittracker.repository.HabitRepository;
 import com.mahajan.habittracker.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,9 +31,13 @@ class AuthFlowIntegrationTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper;
     @Autowired private UserRepository userRepository;
+    @Autowired private HabitRepository habitRepository;
+    @Autowired private HabitCompletionRepository completionRepository;
 
     @BeforeEach
     void setup() {
+        completionRepository.deleteAll(); // 👈 must go first
+        habitRepository.deleteAll();
         userRepository.deleteAll();
     }
 
