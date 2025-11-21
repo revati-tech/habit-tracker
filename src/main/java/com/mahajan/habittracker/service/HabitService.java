@@ -15,7 +15,6 @@ import java.util.List;
 @Slf4j
 public class HabitService {
     private final HabitRepository habitRepository;
-    private final UserService userService;
 
     public List<Habit> getHabitsForUser(User user) {
         return habitRepository.findByUser(user);
