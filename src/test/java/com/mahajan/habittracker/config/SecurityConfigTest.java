@@ -20,9 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SecurityConfigTest {
 
     @Autowired
-    private SecurityConfig securityConfig;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired

@@ -29,5 +29,6 @@ public class Habit {
     private User user;
 
     @OneToMany(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     private List<HabitCompletion> completions = new ArrayList<>();
 }
