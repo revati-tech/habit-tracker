@@ -1,5 +1,6 @@
 package com.mahajan.habittracker.service;
 
+import com.mahajan.habittracker.dto.StreakResult;
 import com.mahajan.habittracker.exceptions.HabitNotFoundException;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.User;
@@ -15,6 +16,8 @@ import java.util.List;
 @Slf4j
 public class HabitService {
     private final HabitRepository habitRepository;
+    private final HabitCompletionService completionService;
+    private final StreakCalculationService streakCalculationService;
 
     public List<Habit> getHabitsForUser(User user) {
         return habitRepository.findByUser(user);
@@ -43,6 +46,19 @@ public class HabitService {
     public void deleteHabitForUser(long inHabitId, User user) {
         Habit existing = getHabitByIdForUser(inHabitId, user);
         habitRepository.delete(existing);
+    }
+
+    /**
+     * Calculates streaks for a habit based on its completions.
+     *
+     * @param habit The habit to calculate streaks for
+     * @param user  The user who owns the habit
+     * @return StreakResult containing currentStreak and longestStreak
+     */
+    public StreakResult calculateStreaksForHabit(Habit habit, User user) {
+        List<com.mahajan.habittracker.model.HabitCompletion> completions = 
+                completionService.getAllCompletionsForHabit(habit, user);
+        return streakCalculationService.calculateStreaks(completions);
     }
 }
 

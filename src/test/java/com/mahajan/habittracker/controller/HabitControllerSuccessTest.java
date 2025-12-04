@@ -2,6 +2,7 @@ package com.mahajan.habittracker.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mahajan.habittracker.dto.HabitRequest;
+import com.mahajan.habittracker.dto.StreakResult;
 import com.mahajan.habittracker.model.Habit;
 import com.mahajan.habittracker.model.User;
 import com.mahajan.habittracker.security.JwtAuthFilter;
@@ -104,6 +105,8 @@ class HabitControllerSuccessTest {
 
         when(habitService.getHabitsForUser(any(User.class)))
                 .thenReturn(List.of(testHabit, habit2));
+        when(habitService.calculateStreaksForHabit(any(Habit.class), any(User.class)))
+                .thenReturn(new StreakResult(0, 0));
 
         mockMvc.perform(get(BASE_URL))
                 .andExpect(status().isOk())
@@ -118,6 +121,8 @@ class HabitControllerSuccessTest {
     @WithMockUser(username = "test@example.com")
     void testGetHabitById() throws Exception {
         when(habitService.getHabitByIdForUser(any(Long.class), any(User.class))).thenReturn(testHabit);
+        when(habitService.calculateStreaksForHabit(any(Habit.class), any(User.class)))
+                .thenReturn(new StreakResult(0, 0));
         mockMvc.perform(get(BASE_URL_WITH_ID, 100L))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("name").value("Exercise"))
@@ -139,8 +144,11 @@ class HabitControllerSuccessTest {
     @WithMockUser(username = "test@example.com")
     void testUpdateHabit() throws Exception {
         HabitRequest habitRequest = HabitRequest.builder().name("Updated Name").description("Updated Description").build();
+        Habit updatedHabit = Habit.builder().id(100L).name("Updated Name").description("Updated Description").build();
         when(habitService.updateHabitForUser(any(Habit.class), any(User.class)))
-                .thenReturn(Habit.builder().id(100L).name("Updated Name").description("Updated Description").build());
+                .thenReturn(updatedHabit);
+        when(habitService.calculateStreaksForHabit(any(Habit.class), any(User.class)))
+                .thenReturn(new StreakResult(0, 0));
         mockMvc.perform(put(BASE_URL_WITH_ID, 100L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(habitRequest)))

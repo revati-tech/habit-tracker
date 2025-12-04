@@ -28,7 +28,11 @@ public class HabitController {
             @AuthenticationPrincipal(expression = "username") String email) {
         User user = userService.getUserByEmail(email);
         List<HabitResponse> habits = habitService.getHabitsForUser(user)
-                .stream().map(HabitResponse::fromEntity)
+                .stream()
+                .map(habit -> {
+                    var streakResult = habitService.calculateStreaksForHabit(habit, user);
+                    return HabitResponse.fromEntity(habit, streakResult.currentStreak(), streakResult.longestStreak());
+                })
                 .toList();
         return ResponseEntity.ok(habits);
     }
@@ -40,8 +44,9 @@ public class HabitController {
         Habit habit = habitRequest.toEntity();
         User user = userService.getUserByEmail(email);
         Habit createdHabit = habitService.createHabitForUser(habit, user);
+        // New habits have no completions, so streaks are always 0 - no need to calculate
         URI location = URI.create("/api/habits/" + createdHabit.getId());
-        return ResponseEntity.created(location).body(HabitResponse.fromEntity(createdHabit));
+        return ResponseEntity.created(location).body(HabitResponse.fromEntity(createdHabit, 0, 0));
     }
 
     @DeleteMapping("/{habitId}")
@@ -58,7 +63,9 @@ public class HabitController {
             @AuthenticationPrincipal(expression = "username") String email) {
         User user = userService.getUserByEmail(email);
         Habit habit = habitService.getHabitByIdForUser(habitId, user);
-        return ResponseEntity.ok(HabitResponse.fromEntity(habit));
+        var streakResult = habitService.calculateStreaksForHabit(habit, user);
+        return ResponseEntity.ok(HabitResponse.fromEntity(habit, 
+                streakResult.currentStreak(), streakResult.longestStreak()));
     }
 
     @PutMapping("/{habitId}")
@@ -70,6 +77,8 @@ public class HabitController {
         habit.setId(habitId);
         User user = userService.getUserByEmail(email);
         Habit updated = habitService.updateHabitForUser(habit, user);
-        return ResponseEntity.ok(HabitResponse.fromEntity(updated));
+        var streakResult = habitService.calculateStreaksForHabit(updated, user);
+        return ResponseEntity.ok(HabitResponse.fromEntity(updated, 
+                streakResult.currentStreak(), streakResult.longestStreak()));
     }
 }
