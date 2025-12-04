@@ -30,12 +30,22 @@ public class GlobalExceptionHandler {
     }
 
     // ------------------ 400 Bad Request ------------------
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException e, HttpServletRequest request) {
+        log.error("Validation failed", e);
+        String message = e.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .findFirst()
+                .orElse("Validation failed");
+        return buildResponse(HttpStatus.BAD_REQUEST, message, request);
+    }
+
     @ExceptionHandler({
             HttpMessageNotReadableException.class,  // missing/invalid body
-            MethodArgumentNotValidException.class,  // @Valid validation errors
             BindException.class,                    // form binding errors
             MissingServletRequestParameterException.class
     })
+    
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception e, HttpServletRequest request) {
         log.error("Bad Request", e);
         return buildResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request);
