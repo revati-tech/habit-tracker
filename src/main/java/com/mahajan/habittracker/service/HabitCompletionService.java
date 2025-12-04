@@ -46,4 +46,8 @@ public class HabitCompletionService {
     public List<HabitCompletion> getCompletions(Habit habit, User user) {
         return completionRepository.findAllByHabitAndUserOrderByCompletionDateDesc(habit, user);
     }
+
+    public List<HabitCompletion> getCompletionsByDate(User user, LocalDate date) {
+        return completionRepository.findAllByUserAndCompletionDate(user, date);
+    }
 }

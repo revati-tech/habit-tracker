@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/habits/{habitId}/completions")
 @RequiredArgsConstructor
 public class HabitCompletionController {
 
@@ -24,9 +23,31 @@ public class HabitCompletionController {
     private final UserService userService;
 
     /**
+     * Returns all habit completions for the given date (or today if not provided) for the authenticated user.
+     */
+    @GetMapping("/api/habits/completions")
+    public ResponseEntity<List<HabitCompletionResponse>> getCompletionsByDate(
+            @RequestParam(required = false) String date,
+            @AuthenticationPrincipal(expression = "username") String email) {
+
+        User currentUser = userService.getUserByEmail(email);
+
+        LocalDate completionDate = (date != null)
+                ? LocalDate.parse(date)
+                : LocalDate.now();
+
+        var responses = completionService.getCompletionsByDate(currentUser, completionDate)
+                .stream()
+                .map(HabitCompletionResponse::fromEntity)
+                .toList();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    /**
      * Marks a habit as completed for the given date (or today if not provided).
      */
-    @PostMapping
+    @PostMapping("/api/habits/{habitId}/completions")
     public ResponseEntity<String> markCompleted(
             @PathVariable Long habitId,
             @RequestParam(required = false) String date,
@@ -46,7 +67,7 @@ public class HabitCompletionController {
     /**
      * Unmarks a habit as completed for the given date
      */
-    @DeleteMapping("/{date}")
+    @DeleteMapping("/api/habits/{habitId}/completions/{date}")
     public ResponseEntity<Void> unmarkCompleted(
             @PathVariable Long habitId,
             @PathVariable String date,
@@ -63,7 +84,7 @@ public class HabitCompletionController {
     /**
      * Returns all completion dates for the given habit and authenticated user.
      */
-    @GetMapping
+    @GetMapping("/api/habits/{habitId}/completions")
     public ResponseEntity<List<HabitCompletionResponse>> getCompletions(
             @PathVariable Long habitId,
             @AuthenticationPrincipal(expression = "username") String email) {

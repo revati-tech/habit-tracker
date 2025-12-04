@@ -17,4 +17,6 @@ public interface HabitCompletionRepository extends JpaRepository<HabitCompletion
     List<HabitCompletion> findAllByHabitAndUserOrderByCompletionDateDesc(Habit habit, User user);
 
     Optional<HabitCompletion> findByHabitAndUserAndCompletionDate(Habit habit, User user, LocalDate date);
+
+    List<HabitCompletion> findAllByUserAndCompletionDate(User user, LocalDate date);
 }

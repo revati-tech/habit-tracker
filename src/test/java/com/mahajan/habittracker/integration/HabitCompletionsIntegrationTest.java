@@ -126,6 +126,110 @@ class HabitCompletionsIntegrationTest {
     }
 
     // -------------------------------------------------------------------------
+    // 🔹 Get Completions by Date Tests
+    // -------------------------------------------------------------------------
+
+    @Test
+    @DisplayName("GET /api/habits/completions?date=... should return all completions for that date")
+    void getCompletionsByDateWithDateParameter() throws Exception {
+        // Create multiple habits
+        Long habitId1 = createHabit("Workout", "Daily exercise");
+        Long habitId2 = createHabit("Read", "Reading books");
+        String date = "2025-12-03";
+
+        // Mark both habits as completed on the same date
+        mockMvc.perform(post("/api/habits/{id}/completions", habitId1)
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", date))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/habits/{id}/completions", habitId2)
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", date))
+                .andExpect(status().isOk());
+
+        // Get completions for that date
+        mockMvc.perform(get("/api/habits/completions")
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", date))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].habitId").exists())
+                .andExpect(jsonPath("$[0].habitName").exists())
+                .andExpect(jsonPath("$[0].completionDate").value(date))
+                .andExpect(jsonPath("$[1].habitId").exists())
+                .andExpect(jsonPath("$[1].habitName").exists())
+                .andExpect(jsonPath("$[1].completionDate").value(date));
+    }
+
+    @Test
+    @DisplayName("GET /api/habits/completions without date should return completions for today")
+    void getCompletionsByDateWithoutDateParameter() throws Exception {
+        LocalDate today = LocalDate.now();
+
+        // Mark habit as completed (defaults to today)
+        mockMvc.perform(post("/api/habits/{id}/completions", habitId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        // Get completions without date parameter (should default to today)
+        mockMvc.perform(get("/api/habits/completions")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].habitId").value(habitId.intValue()))
+                .andExpect(jsonPath("$[0].completionDate").value(today.toString()));
+    }
+
+    @Test
+    @DisplayName("GET /api/habits/completions?date=... should return empty list when no completions exist")
+    void getCompletionsByDateWithNoCompletions() throws Exception {
+        String date = "2025-12-03";
+
+        mockMvc.perform(get("/api/habits/completions")
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", date))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    @DisplayName("GET /api/habits/completions should only return completions for the specified date")
+    void getCompletionsByDateShouldFilterByDate() throws Exception {
+        String date1 = "2025-12-03";
+        String date2 = "2025-12-04";
+
+        // Mark habit as completed on date1
+        mockMvc.perform(post("/api/habits/{id}/completions", habitId)
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", date1))
+                .andExpect(status().isOk());
+
+        // Get completions for date2 (should be empty)
+        mockMvc.perform(get("/api/habits/completions")
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", date2))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
+
+        // Get completions for date1 (should have one)
+        mockMvc.perform(get("/api/habits/completions")
+                        .header("Authorization", "Bearer " + token)
+                        .param("date", date1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(1)))
+                .andExpect(jsonPath("$[0].completionDate").value(date1));
+    }
+
+    @Test
+    @DisplayName("GET /api/habits/completions without JWT should return 401 Unauthorized")
+    void getCompletionsByDateWithoutJwtShouldFail() throws Exception {
+        mockMvc.perform(get("/api/habits/completions")
+                        .param("date", "2025-12-03"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // -------------------------------------------------------------------------
     // 🔹 Helper methods (reused from HabitsIntegrationTest)
     // -------------------------------------------------------------------------
 
