@@ -107,7 +107,7 @@ class HabitCompletionControllerTest {
         Mockito.when(habitService.getHabitByIdForUser(HABIT_ID, mockUser)).thenReturn(mockHabit);
 
 
-        Mockito.when(completionService.getCompletions(mockHabit, mockUser))
+        Mockito.when(completionService.getAllCompletionsForHabit(mockHabit, mockUser))
                 .thenReturn(List.of()); // The controller maps entities to DTOs — skip that level for simplicity
 
         mockMvc.perform(get("/api/habits/{habitId}/completions", HABIT_ID)

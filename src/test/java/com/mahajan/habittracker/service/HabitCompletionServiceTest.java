@@ -85,7 +85,7 @@ class HabitCompletionServiceTest {
         when(completionRepository.findAllByHabitAndUserOrderByCompletionDateDesc(habit, user))
                 .thenReturn(List.of(c1, c2));
 
-        List<HabitCompletion> result = completionService.getCompletions(habit, user);
+        List<HabitCompletion> result = completionService.getAllCompletionsForHabit(habit, user);
 
         assertEquals(2, result.size());
         assertCompletionEquals(c1, result.get(0));
@@ -100,7 +100,7 @@ class HabitCompletionServiceTest {
         when(completionRepository.findAllByHabitAndUserOrderByCompletionDateDesc(habit, user))
                 .thenReturn(List.of());
 
-        List<HabitCompletion> result = completionService.getCompletions(habit, user);
+        List<HabitCompletion> result = completionService.getAllCompletionsForHabit(habit, user);
 
         assertTrue(result.isEmpty());
         verify(completionRepository, times(1))

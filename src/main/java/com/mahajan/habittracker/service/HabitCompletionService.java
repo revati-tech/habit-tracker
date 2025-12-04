@@ -43,7 +43,7 @@ public class HabitCompletionService {
         completionRepository.delete(completion);
     }
 
-    public List<HabitCompletion> getCompletions(Habit habit, User user) {
+    public List<HabitCompletion> getAllCompletionsForHabit(Habit habit, User user) {
         return completionRepository.findAllByHabitAndUserOrderByCompletionDateDesc(habit, user);
     }
 

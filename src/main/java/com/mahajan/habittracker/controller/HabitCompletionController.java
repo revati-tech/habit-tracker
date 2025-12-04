@@ -92,7 +92,7 @@ public class HabitCompletionController {
         User currentUser = userService.getUserByEmail(email);
         Habit habit = habitService.getHabitByIdForUser(habitId, currentUser);
 
-        var responses = completionService.getCompletions(habit, currentUser)
+        var responses = completionService.getAllCompletionsForHabit(habit, currentUser)
                 .stream()
                 .map(HabitCompletionResponse::fromEntity)
                 .toList();
