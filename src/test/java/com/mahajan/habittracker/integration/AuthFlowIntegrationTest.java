@@ -47,27 +47,20 @@ class AuthFlowIntegrationTest {
         // 1. Signup a new user (using DTO, not entity)
         SignupRequest signupRequest =  SignupRequest.builder()
                 .email("alice@example.com").password("password123").build();
-        mockMvc.perform(post("/api/auth/signup")
+        
+        String signupResponse = mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("User registered successfully"));
-
-        assertThat(userRepository.findByEmail("alice@example.com")).isPresent();
-
-        // 2. Login with correct credentials
-        LoginRequest loginRequest = LoginRequest.builder()
-                .email("alice@example.com").password("password123").build();
-
-        String loginResponse = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        String token = objectMapper.readTree(loginResponse).get("token").asText();
+        assertThat(userRepository.findByEmail("alice@example.com")).isPresent();
+
+        // Extract token from signup response
+        String token = objectMapper.readTree(signupResponse).get("token").asText();
         assertThat(token).isNotBlank();
 
         // 3. Access protected endpoint with token
@@ -128,6 +121,6 @@ class AuthFlowIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(signupRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("User registered successfully"));
+                .andExpect(jsonPath("$.token").exists());
     }
 }

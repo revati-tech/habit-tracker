@@ -56,19 +56,20 @@ class AuthControllerTest {
     class SignupTests {
 
         @Test
-        @DisplayName("should register new user")
+        @DisplayName("should register new user and return JWT token")
         void signupSuccess() throws Exception {
             SignupRequest request = SignupRequest.builder()
                     .email("alice@example.com").password("password123").build();
 
             Mockito.when(userService.existsByEmail("alice@example.com")).thenReturn(false);
             Mockito.when(userService.createUser(any(User.class))).thenReturn(new User());
+            Mockito.when(jwtUtil.generateToken("alice@example.com")).thenReturn("fake-jwt-token");
 
             mockMvc.perform(post("/api/auth/signup")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
-                    .andExpect(content().string("User registered successfully"));
+                    .andExpect(jsonPath("$.token").value("fake-jwt-token"));
         }
 
         @Test

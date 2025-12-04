@@ -29,7 +29,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<AuthResponse> signup(@Valid @RequestBody SignupRequest request) {
         if (userService.existsByEmail(request.getEmail())) {
             throw new EmailAlreadyExistsException(request.getEmail());
         }
@@ -37,7 +37,11 @@ public class AuthController {
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
         userService.createUser(user);
-        return ResponseEntity.ok("User registered successfully");
+        
+        // Generate JWT token for the newly registered user
+        String token = jwtUtil.generateToken(request.getEmail());
+        log.info("Signup success userId={}", request.getEmail());
+        return ResponseEntity.ok(new AuthResponse(token));
     }
 
     @PostMapping("/login")
