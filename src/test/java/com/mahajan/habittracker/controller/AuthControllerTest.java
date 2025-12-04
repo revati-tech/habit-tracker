@@ -84,6 +84,72 @@ class AuthControllerTest {
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.message").value("Email already in use: bob@example.com"));
         }
+
+        @Test
+        @DisplayName("should fail if password is too short (less than 8 characters)")
+        void signupPasswordTooShort() throws Exception {
+            SignupRequest request = SignupRequest.builder()
+                    .email("test@example.com")
+                    .password("pwd")
+                    .build();
+
+            mockMvc.perform(post("/api/auth/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("Password must be between 8 and 32 characters"));
+        }
+
+        @Test
+        @DisplayName("should fail if password is too long (more than 32 characters)")
+        void signupPasswordTooLong() throws Exception {
+            String longPassword = "a".repeat(33); // 33 characters
+            SignupRequest request = SignupRequest.builder()
+                    .email("test@example.com")
+                    .password(longPassword)
+                    .build();
+
+            mockMvc.perform(post("/api/auth/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("Password must be between 8 and 32 characters"));
+        }
+
+        @Test
+        @DisplayName("should accept password with exactly 8 characters")
+        void signupPasswordExactly8Characters() throws Exception {
+            SignupRequest request = SignupRequest.builder()
+                    .email("test@example.com")
+                    .password("12345678")
+                    .build();
+
+            Mockito.when(userService.existsByEmail("test@example.com")).thenReturn(false);
+            Mockito.when(userService.createUser(any(User.class))).thenReturn(new User());
+
+            mockMvc.perform(post("/api/auth/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("should accept password with exactly 32 characters")
+        void signupPasswordExactly32Characters() throws Exception {
+            String password32 = "a".repeat(32); // exactly 32 characters
+            SignupRequest request = SignupRequest.builder()
+                    .email("test@example.com")
+                    .password(password32)
+                    .build();
+
+            Mockito.when(userService.existsByEmail("test@example.com")).thenReturn(false);
+            Mockito.when(userService.createUser(any(User.class))).thenReturn(new User());
+
+            mockMvc.perform(post("/api/auth/signup")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(request)))
+                    .andExpect(status().isOk());
+        }
     }
 
     @Nested
