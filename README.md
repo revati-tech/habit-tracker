@@ -9,7 +9,7 @@ This backend provides REST APIs to add, list, and delete habits.
 - Add a new habit
 - List all habits
 - Delete a habit
-- Uses **Spring Boot**, **Spring Data JPA**, and **H2 database**
+- Uses **Spring Boot**, **Spring Data JPA**, and **PostgreSQL (Neon)**
 
 ---
 
@@ -17,8 +17,8 @@ This backend provides REST APIs to add, list, and delete habits.
 - Java 17
 - Spring Boot 3
 - Maven
-- H2 (in-memory database)
-- IntelliJ IDEA (Community Edition)
+- PostgreSQL (Neon - cloud database)
+- Cursor
 
 ---
 
@@ -35,26 +35,22 @@ This backend provides REST APIs to add, list, and delete habits.
    cd habit-tracker
    ```
 
-2. Run PostgreSQL in Docker
+2. Run the application with the appropriate Spring profile:
 
-Start a local PostgreSQL container for the app:
-
-```bash
-docker run --name habittracker-postgres \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_DB=habittracker \
-  -p 5432:5432 \
-  -d postgres:16
-
-3. Run the application:
+   **For Local Development:**
    ```bash
-   ./mvnw spring-boot:run
+   SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
    ```
+   This uses the Neon Development database.
 
-4. Access the app:
+   **For Production/Deployed:**
+   ```bash
+   SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run
+   ```
+   This uses the Neon Production database.
+
+3. Access the app:
    - API base URL: `http://localhost:8080/api/habits`
-   - H2 Console: `http://localhost:8080/h2-console`
 
 ---
 

@@ -69,15 +69,33 @@ habit-tracker
 │  │     └─ application.properties
 └─ pom.xml
 
-Step 5: Run Your Spring Boot App
+Step 5: Configure Database Connection
 
-Open HabitTrackerApplication.java.
+The project uses Neon PostgreSQL databases with Spring profiles:
+- **Development**: Use `SPRING_PROFILES_ACTIVE=dev` for local development (connects to Neon Development DB)
+- **Production**: Use `SPRING_PROFILES_ACTIVE=prod` for deployed/production (connects to Neon Production DB)
 
-Right-click → Run HabitTrackerApplication.main()
+Database configurations are in:
+- `src/main/resources/application-dev.properties` (Development)
+- `src/main/resources/application-prod.properties` (Production)
+
+Step 6: Run Your Spring Boot App
+
+**Option 1: Via Cursor**
+1. Open HabitTrackerApplication.java
+2. Right-click → Run → Edit Configurations
+3. Add VM options or Environment variables:
+   - Environment variables: `SPRING_PROFILES_ACTIVE=dev`
+4. Run HabitTrackerApplication.main()
+
+**Option 2: Via Command Line**
+```bash
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+```
 
 Check the console for:
 
 Started HabitTrackerApplication in X seconds
 
 
-✅ At this point, you have a working Spring Boot project in IntelliJ Community Edition.
+✅ At this point, you have a working Spring Boot project connected to Neon PostgreSQL.
