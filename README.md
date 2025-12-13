@@ -26,31 +26,43 @@ This backend provides REST APIs to add, list, and delete habits.
 
 ### Prerequisites
 - Java 17+
-- Maven (bundled with IntelliJ)
+- Maven (or use `./mvnw`)
+- Neon database credentials (get from [Neon Dashboard](https://console.neon.tech/))
 
-### Steps
-1. Clone the repository:
+### Quick Start
+
+1. **Create `.env` file** with your Neon database credentials:
    ```bash
-   git clone https://github.com/your-username/habit-tracker.git
-   cd habit-tracker
+   cp env.example .env
+   # Edit .env with your actual credentials
    ```
 
-2. Run the application with the appropriate Spring profile:
-
-   **For Local Development:**
+2. **Run the application:**
    ```bash
-   SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+   ./run-local.sh
    ```
-   This uses the Neon Development database.
-
-   **For Production/Deployed:**
-   ```bash
-   SPRING_PROFILES_ACTIVE=prod ./mvnw spring-boot:run
-   ```
-   This uses the Neon Production database.
+   
+   This script automatically loads your `.env` file and starts the app with the correct profile.
 
 3. Access the app:
    - API base URL: `http://localhost:8080/api/habits`
+
+### Environment Variables
+
+The app uses environment variables for configuration. Create a `.env` file:
+
+```bash
+cp env.example .env
+# Edit .env with your Neon database credentials
+```
+
+**Required variables:**
+- `SPRING_DATASOURCE_URL` - Your Neon database connection string
+- `SPRING_DATASOURCE_USERNAME` - Database username
+- `SPRING_DATASOURCE_PASSWORD` - Database password
+- `SPRING_PROFILES_ACTIVE=dev` - Set to `dev` for local development
+
+**Security:** Never commit your `.env` file - it's gitignored. See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for production deployment.
 
 ---
 
