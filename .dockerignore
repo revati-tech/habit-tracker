@@ -1,0 +1,39 @@
+# Maven
+target/
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in container)
+*.md
+docs/
+postman/
+
+# Test files
+src/test/
+
+# Build artifacts
+*.class
+*.log
+*.jar
+!target/*.jar
+
+# Environment files (use env vars instead)
+.env
+.env.local
+
