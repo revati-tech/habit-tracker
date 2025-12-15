@@ -61,6 +61,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/health").permitAll()        // health check is public
                         .requestMatchers("/api/auth/**").permitAll()   // signup/login are public
                         .anyRequest().authenticated()                    // everything else requires auth
                 )

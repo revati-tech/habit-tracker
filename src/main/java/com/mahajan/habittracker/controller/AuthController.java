@@ -46,15 +46,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        log.info("Login attempt for email={}", request.getEmail());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
             );
             String token = jwtUtil.generateToken(request.getEmail());
-            log.info("Login success userId={}", request.getEmail());
+            log.info("Login success for email={}", request.getEmail());
             return ResponseEntity.ok(new AuthResponse(token));
         } catch (Exception e) {
-            log.warn("Login failed for userId={}: {}", request.getEmail(), e.getMessage());
+            log.warn("Login failed for email={}: {}", request.getEmail(), e.getMessage());
             throw e;
         }
     }

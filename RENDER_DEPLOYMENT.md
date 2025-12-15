@@ -71,7 +71,7 @@ Render automatically sets the `PORT` environment variable for you. Your applicat
 ### 4. Advanced Settings (Optional)
 
 - **Auto-Deploy**: Enable to automatically deploy on git push
-- **Health Check Path**: `/api/auth/signup` (or any public endpoint)
+- **Health Check Path**: `/health` (dedicated health endpoint)
 - **Plan**: Choose based on your needs (Free tier available)
 
 ## Environment Variables Summary
@@ -107,7 +107,7 @@ After deployment, check:
    - `Started HabitTrackerApplication`
    - `HikariPool-1 - Start completed`
    - No database connection errors
-3. **Health check**: The app should respond to HTTP requests
+3. **Health check**: Test `GET /health` endpoint - should return `{"status":"UP"}`
 
 ## Troubleshooting
 
