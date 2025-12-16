@@ -43,10 +43,12 @@ public class HabitCompletionService {
         completionRepository.delete(completion);
     }
 
+    @Transactional(readOnly = true)
     public List<HabitCompletion> getAllCompletionsForHabit(Habit habit, User user) {
         return completionRepository.findAllByHabitAndUserOrderByCompletionDateDesc(habit, user);
     }
 
+    @Transactional(readOnly = true)
     public List<HabitCompletion> getCompletionsByDate(User user, LocalDate date) {
         return completionRepository.findAllByUserAndCompletionDate(user, date);
     }
